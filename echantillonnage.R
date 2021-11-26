@@ -1,7 +1,6 @@
-#######################################################################################
-# Installation
-#######################################################################################
-
+################################################################################
+# Instalation
+################################################################################
 
 # Installer les packages R necessaires si ils ne sont pas déjà installé
 if (!require('lubridate')) install.packages('lubridate')
@@ -22,19 +21,45 @@ source('R/move_samples.R')
 
 
 
+################################################################################
+# Définir les dossiers d'entrée et de sortie des fichiers audio
+################################################################################
+
+# Définir le dossier d'entrée (disque dur de stockage)
+inputFolder <- rstudioapi::selectDirectory()
+
+# Définir le dossier de sortir (où sauvegarder les audio sélectionnés?)
+outputFolder <- rstudioapi::selectDirectory()
+
+
+# Teste pour vérifier si les dossiers sélectionnés existent
+for(int in c('input', 'output')) {
+    if(!dir.exists(get(paste0(int, 'Folder')))) {
+        cat(paste0('\u2717 Le `', int, 'Folder` ', 'est incorrect!\n'))
+        stop(
+            paste0("Le dossier `", get(paste0(int, 'Folder')), "` n'existe pas ou il n'est pas accessible")
+        )
+    }else{
+        cat(paste0('\u2713 Le `', int, 'Folder` ', 'est correct!\n'))
+    }
+}
 
 
 
 
 
+################################################################################
+# Extraire et valider les sonomètres dans le dossier d'entrée
+################################################################################
 
+# Extraire toute les dossiers à l'interieur du dossier inputFolder
+sonometres <- dir(inputFolder)
 
+# Voici toutes les dossiers trouvé:
+print(sonometres)
 
-# Identifier tous les sonometres dans le dossier avec le patron `Data`
-sonometres <- dir(pattern = 'Data')
-
-# Si il y a des sonometres à enlever, les lister ici:
-# e.g.: sonometres_a_enlever <- c('Data_S4A01334', 'Data_S4A03715')
+# Si il y a des sonometres à enlever, les lister comme dans le example:
+# sonometres_a_enlever <- c('710-607-1_ABC', '710-607-2_ABC', '...n sonomètre')
 sonometres_a_enlever <- c('', '')
 
 # Filter les sonometres à enlever
