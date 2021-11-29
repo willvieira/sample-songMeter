@@ -133,7 +133,9 @@ for(sono in sonometres)
 
     # Déplacer les fichiers
     move_files(
-        sampled = sono_echantillonne
+        sampled = sono_echantillonne,
+        input = inputFolder,
+        output = outputFolder
     )
 
 }

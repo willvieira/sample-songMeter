@@ -7,52 +7,70 @@
 
 ####################################################################
 # For a given Sound level meter
-#   - create folders for each nesting/day period (A1-E6)
+#   - create folders
 #   - Move all files from sampled dt
 ####################################################################
 
 
-move_files <- function(sampled)
+move_files <- function(sampled, input, output)
 {
-    songMeter <- sampled$songMeter[1]
+    # song meter name
+    songMeter_input <- file.path(input, sampled$songMeter[1])
+    songMeter_output <- file.path(output, sampled$songMeter[1])
 
-    # list all nesting/day periods
-    periods <- sort(unique(sampled$period))
 
-    # create a folder for all nesting/day periods
-    invisible(lapply(
-                as.list(file.path(songMeter,
-                paste(rep(c('Echantillons', 'Echantillons_supplementaires'),
-                each = length(periods)), periods, sep = '/'))), dir.create, recursive = TRUE))
+    # create a 3 and 10 min folder for each song meter
+    invisible(
+        sapply(
+            file.path(
+                songMeter_input,
+                c(
+                    file.path(
+                        c('audio_3min', 'audio_10min'),
+                        'Echantillons_supplementaires'
+                    )
+                )
+            ),
+            dir.create, recursive = TRUE
+        )
+    )
 
-    # folder for Atlas
-    dir.create(file.path(songMeter, 'Atlas'))
-    
-    # move atlas file
-    fileAtlas <- sampled$fileName[sampled$sampleType == 'atlas']
-    file.rename(from = file.path(songMeter, fileAtlas),
-                to = file.path(songMeter, 'Atlas', fileAtlas))
 
     # create file name with directory `from` and `to`
-    sampled_mainOver <- subset(sampled, sampleType %in% c('main', 'over'))
-
-    sampled_mainOver$from <- file.path(sampled_mainOver$songMeter,
-                                       sampled_mainOver$fileName)
+    sampled$from <- file.path(
+        songMeter_input,
+        sampled$fileName
+    )
     
-    sampled_mainOver$to <- file.path(sampled_mainOver$songMeter,
-                                     ifelse(sampled_mainOver$sampleType == 'main', 'Echantillons', 'Echantillons_supplementaires'),
-                                     sampled_mainOver$period,
-                                     sampled_mainOver$fileName)
+    sampled$to <- file.path(
+        songMeter_output,
+        ifelse(
+            sampled$duration == 180,
+            'audio_3min', 'audio_10min'
+        ),
+        ifelse(
+            sampled$sampleType == 'main',
+            '', 'Echantillons_supplementaires'
+        ),
+        sampled$fileName
+    )
 
-    moveResults <- file.rename(sampled_mainOver$from, sampled_mainOver$to)
+
+    # copy
+    moveResults <- file.copy(
+        sampled$from,
+        sampled$to,
+        copy.date = TRUE
+    )
+
 
     # Message
     if(all(moveResults))
     {
-        cat('   All', length(moveResults) + 1, 'files have been moved successfully!\n\n\n')
+        cat('   All', length(moveResults), 'files have been moved successfully!\n\n\n')
     }else{
         msg <- 'We had problems moving the following files:\n'
-        missingRows <- sampled_mainOver[which(!moveResults), c('songMeter', 'fileName')]
+        missingRows <- sampled[which(!moveResults), c('songMeter', 'fileName')]
         cat(msg,
             paste0(paste0(' - ',
                     apply(missingRows, 1, function(x) file.path(x[1], x[2]))), collapse = '\n'), '\n\n')
