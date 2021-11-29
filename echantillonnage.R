@@ -74,7 +74,7 @@ for(sono in sonometres)
     # lister toutes les fichiers pour le sonometre
     # `sizeRange_*` defini les limites min et max de taille (en KB) pour les fichiers 3 minutes et 10 minutes
     sono_dt <- listAudio(
-        Dir = sono,
+        Dir = file.path(inputFolder, sono),
         sizeRange_3 = c(30000, 40000),
         sizeRange_10 = c(100000, 110000)
     )
