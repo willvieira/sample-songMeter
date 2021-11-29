@@ -31,7 +31,7 @@ move_files <- function(sampled, input, output)
                     )
                 )
             ),
-            dir.create, recursive = TRUE
+            dir.create, recursive = TRUE, showWarnings = FALSE
         )
     )
 
