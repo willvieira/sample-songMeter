@@ -114,20 +114,21 @@ for(sono in sonometres)
 
     # Générer une figure avec tous les fichiers distribué par periode de nidification et dans la journée
     # `colorDay` définit si on va différencier (TRUE) ou non (FALSE) les périodes de la journée avec une couleur
+    # `outputFile` c'est le dossier avec le nom du fichier où la fonction va sauvegarder le pdf
     # la figure sera sauvegardé dedans le dossier du sonomètre
     plot_files(
         dt = sonoClass_dt,
-        colorDay = TRUE
+        colorDay = TRUE,
+        outputFile = file.path(outputFolder, sono, 'fichiersAudio.pdf')
     )
 
 
     # Générer une deuxième figure avec tous les fichiers + les fichiers echantillonés colorés
-    # `fileSuffix` consiste à ajouter un suffixe dans le nom du fichier pour éviter l'écrasement de celui géneré dans l'étape precedent
     plot_files(
         dt = sonoClass_dt,
         sampled = sono_echantillonne,
         colorDay = FALSE,
-        fileSuffix = '_echantillon'
+        outputFile = file.path(outputFolder, sono, 'fichiersAudio_echantillon.pdf')
     )
 
 

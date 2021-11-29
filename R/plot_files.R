@@ -5,10 +5,9 @@
 ####################################################################
 
 
-plot_files <- function(dt, sampled = NULL, colorDay = FALSE, fileSuffix = NULL)
+plot_files <- function(dt, sampled = NULL, colorDay = FALSE, outputFile = NULL)
 {
     dt_tz <- lubridate::tz(dt$time[1])
-    songMeter <- dt$songMeter[1]
 
     # define sequence of days (y axis)
     startDay <- lubridate::date(min(dt$time))
@@ -45,13 +44,8 @@ plot_files <- function(dt, sampled = NULL, colorDay = FALSE, fileSuffix = NULL)
     seqSeconds <- seqHours * 3600
     seqHours[which(seqHours > 23)] <- seqHours[which(seqHours > 23)] - 24
 
-    # Basic plot
-    if(is.null(fileSuffix)) {
-        fileName <- file.path(songMeter, paste0(songMeter, '.pdf'))
-    }else{
-        fileName <- file.path(songMeter, paste0(songMeter, fileSuffix, '.pdf'))
-    }
-    pdf(height = 9.12, width = 12.43, file = fileName)
+
+    pdf(height = 9.12, width = 12.43, file = outputFile)
     par(mar = c(2, 7, 2, 0.5))
     plot(0, pch = '', xlim = c(minStartRecord, 86400 + minStartRecord), ylim = c(endDay + lubridate::days(1), startDay), bty = 'n', ann = FALSE, xaxt = 'n', yaxt = 'n')
     mtext(sf(seqDays), side = 2, at = seqDays, las = 1, line = 5.5, cex = 0.8, adj = 0)
