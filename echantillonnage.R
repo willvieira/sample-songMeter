@@ -32,19 +32,6 @@ inputFolder <- rstudioapi::selectDirectory()
 outputFolder <- rstudioapi::selectDirectory()
 
 
-# Teste pour vérifier si les dossiers sélectionnés existent
-for(int in c('input', 'output')) {
-    if(!dir.exists(get(paste0(int, 'Folder')))) {
-        cat(paste0('\u2717 Le `', int, 'Folder` ', 'est incorrect!\n'))
-        stop(
-            paste0("Le dossier `", get(paste0(int, 'Folder')), "` n'existe pas ou il n'est pas accessible")
-        )
-    }else{
-        cat(paste0('\u2713 Le `', int, 'Folder` ', 'est correct!\n'))
-    }
-}
-
-
 
 
 
