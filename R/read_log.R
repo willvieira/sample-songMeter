@@ -122,7 +122,7 @@ read_log <- function(file)
 }
 
 
-# List audio files from a specific sonometer directory
+# List audio files from a specific song meter directory
 # Input:
 #   - directory
 #   - sizeRange_3: vector of minimum and maximum range of size for 3 min files
