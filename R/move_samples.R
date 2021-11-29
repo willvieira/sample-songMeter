@@ -19,23 +19,6 @@ move_files <- function(sampled, input, output)
     songMeter_output <- file.path(output, sampled$songMeter[1])
 
 
-    # create a 3 and 10 min folder for each song meter
-    invisible(
-        sapply(
-            file.path(
-                songMeter_input,
-                c(
-                    file.path(
-                        c('audio_3min', 'audio_10min'),
-                        'Echantillons_supplementaires'
-                    )
-                )
-            ),
-            dir.create, recursive = TRUE, showWarnings = FALSE
-        )
-    )
-
-
     # create file name with directory `from` and `to`
     sampled$from <- file.path(
         songMeter_input,

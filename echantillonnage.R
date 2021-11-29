@@ -53,6 +53,22 @@ sonometres_a_enlever <- c('', '')
 sonometres <- sonometres[!sonometres %in% sonometres_a_enlever]
 
 
+# Créer un dossier 3 et 10 min pour chaque sonomètres
+invisible(
+    sapply(
+        file.path(
+            songMeter_input,
+            c(
+                file.path(
+                    c('audio_3min', 'audio_10min'),
+                    'Echantillons_supplementaires'
+                )
+            )
+        ),
+        dir.create, recursive = TRUE
+    )
+)
+
 
 
 
