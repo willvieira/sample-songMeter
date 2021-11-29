@@ -50,9 +50,12 @@ move_files <- function(sampled, input, output)
         ),
         ifelse(
             sampled$sampleType == 'main',
-            '', 'Echantillons_supplementaires'
-        ),
-        sampled$fileName
+            sampled$fileName,
+            paste0(
+                'Echantillons_supplementaires/',
+                sampled$fileName
+            )
+        )
     )
 
 
