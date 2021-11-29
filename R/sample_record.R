@@ -108,25 +108,25 @@ sample_files <- function(dt, sampleSize = 1, overSample = 1)
     # Select Atlas file from Dawn period with at least 10 minutes record
     #############################################################
 
-    # Filter all files from Dawn with at least 10 minutes duration
-    dawnFiles <- subset(dt, period %in% paste0(rep(LETTERS[1:5], each = 3), 1:3) & duration >= 600)
+    # # Filter all files from Dawn with at least 10 minutes duration
+    # dawnFiles <- subset(dt, period %in% paste0(rep(LETTERS[1:5], each = 3), 1:3) & duration >= 600)
     
-    # get row names of already sampled files from this period
-    alreadySampled_dawn <- rownames(subset(sampled, duration >= 600 & period %in% paste0(rep(LETTERS[1:5], each = 3), 1:3)))
+    # # get row names of already sampled files from this period
+    # alreadySampled_dawn <- rownames(subset(sampled, duration >= 600 & period %in% paste0(rep(LETTERS[1:5], each = 3), 1:3)))
     
-    # sample atlas file
-    specialRow <- sample(rownames(dawnFiles[which(!rownames(dawnFiles) %in% alreadySampled_dawn), ]), 1)
+    # # sample atlas file
+    # specialRow <- sample(rownames(dawnFiles[which(!rownames(dawnFiles) %in% alreadySampled_dawn), ]), 1)
 
-    # add atlas file to sampled dt
-    specialDt <- dt[specialRow, ]
-    specialDt$sampleType <- 'atlas'
-    sampled <- rbind(sampled, specialDt)
+    # # add atlas file to sampled dt
+    # specialDt <- dt[specialRow, ]
+    # specialDt$sampleType <- 'atlas'
+    # sampled <- rbind(sampled, specialDt)
 
     # Return message
     msg <- paste0(' For the ', length(groups), ' nesting and day periods:\n')
     msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'main')), ' main samples\n')
     msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'over')), ' over samples\n')
-    msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'atlas')), ' atlas samples\n')
+    # msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'atlas')), ' atlas samples\n')
     cat(msg)    
     
     return( sampled )
