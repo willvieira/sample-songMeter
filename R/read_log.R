@@ -142,8 +142,10 @@ listAudio <- function(Dir = '.', sizeRange_3 = NA, sizeRange_10 = NA)
         if( !is.na(sizeRange_10) )
         {
             toKeep <- which(
-                fileSizes >= sizeRange_3[1] & fileSizes <= sizeRange_3[2] |
-                fileSizes >= sizeRange_10[1] & fileSizes <= sizeRange_10[2]
+                fileSizes/1e3 >= sizeRange_3[1] &
+                fileSizes/1e3 <= sizeRange_3[2] |
+                fileSizes/1e3 >= sizeRange_10[1] &
+                fileSizes/1e3 <= sizeRange_10[2]
             )
 
             files <- files[toKeep]
@@ -161,8 +163,15 @@ listAudio <- function(Dir = '.', sizeRange_3 = NA, sizeRange_10 = NA)
     formatedTime <- lubridate::ymd_hms(yearHour, tz = 'America/Toronto') # TODO
 
     # calculate recording time based on file size (and sample rate and bits)
-    audio1 <- tuneR::readWave(file.path(Dir, files[which(fileSizes > 5000)[1]]))
-    duration <- fileSizes/(audio1@samp.rate * (audio1@bit/8) * ifelse(audio1@stereo, 2, 1))
+    audio1 <- tuneR::readWave(
+        file.path(
+            Dir,
+            files[which(fileSizes/1e3 > 5000)[1]]
+        )
+    )
+    duration <- fileSizes/
+        (audio1@samp.rate * (audio1@bit/8) * ifelse(audio1@stereo, 2, 1))
+
 
     cat(    '\n\n', length(files), 'files were found for the song meter:', Dir, '\n\n')
 
