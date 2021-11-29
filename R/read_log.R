@@ -122,48 +122,55 @@ read_log <- function(file)
 }
 
 
-# List audio filesv from SM4 recorder of a directory
+# List audio files from a specific sonometer directory
 # Input:
 #   - directory
-#   - filterSize: minimum file size in KB to filter
+#   - sizeRange_3: vector of minimum and maximum range of size for 3 min files
+#   - sizeRange_10: vector of minimum and maximum range of size for 10 min files
 # Return data.frame similar to log
-listAudio_sm4 <- function(Dir = '.', filterSize = NA)
+listAudio <- function(Dir = '.', sizeRange_3 = NA, sizeRange_10 = NA)
 {
     files <- dir(Dir, pattern = '.wav')
 
-    # filter files with pattern `S4`
-    files <- files[grep('S4', files)]
-    
     # get size of files
     fileSizes <- file.size(file.path(Dir, files))
-    
-    # Filter files with size >= `filterSize` in Mb
-    if(!is.na(filterSize))
-    {
-        files <- files[which(round(fileSizes/1e3, 0) >= filterSize)]
-        fileSizes <- fileSizes[which(round(fileSizes/1e3, 0) >= filterSize)]
-    }
-        
 
-    # check if filtered files does not have + or - (pattern from BarLT recorder)
-    if(sum(grep('\\+|\\-', files)) > 0)
+    # Filter files within size range in Kb
+    
+    if( !is.na(sizeRange_3) )
     {
-        msg <- paste0('I found files that should not be here. The following files have the pattern + OR - which are from Bar-LT recorders:\n',
-                       paste0(grep('\\+|\\-', files, value = TRUE), collapse = '\n'))
-        stop(msg)
+        if( !is.na(sizeRange_10) )
+        {
+            toKeep <- which(
+                fileSizes >= sizeRange_3[1] & fileSizes <= sizeRange_3[2] |
+                fileSizes >= sizeRange_10[1] & fileSizes <= sizeRange_10[2]
+            )
+
+            files <- files[toKeep]
+            fileSizes <- fileSizes[toKeep]
+        }else{
+            cat('Ignore filtering files by size because at least one of the `sizeRange_` arguments are` NA`\n')
+        }
+    }else{
+        cat('Ignore filtering files by size because at least one of the `sizeRange_` arguments are` NA`\n')
     }
 
     ## Extract time from file name
     # remove extension and recorder name
     yearHour <- gsub('^[^_]*_', '', gsub('.wav', '', files))
     formatedTime <- lubridate::ymd_hms(yearHour, tz = 'America/Toronto') # TODO
-    
+
     # calculate recording time based on file size (and sample rate and bits)
     audio1 <- tuneR::readWave(file.path(Dir, files[1]))
     duration <- fileSizes/(audio1@samp.rate * (audio1@bit/8) * ifelse(audio1@stereo, 2, 1))
 
     cat(    '\n\n', length(files), 'files were found for the song meter:', Dir, '\n\n')
 
-    data.frame(time = formatedTime, songMeter = rep(Dir, length(files)), fileName = files, fileSize = fileSizes/1e3, duration = round(duration, 1))
+    data.frame(
+        time = formatedTime,
+        songMeter = Dir,
+        fileName = files,
+        fileSize = fileSizes/1e3,
+        duration = round(duration, 1))
 
 }
