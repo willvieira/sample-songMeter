@@ -137,9 +137,9 @@ listAudio <- function(Dir = '.', sizeRange_3 = NA, sizeRange_10 = NA)
 
     # Filter files within size range in Kb
     
-    if( !is.na(sizeRange_3) )
+    if( !is.na(sizeRange_3[1]) )
     {
-        if( !is.na(sizeRange_10) )
+        if( !is.na(sizeRange_10[1]) )
         {
             toKeep <- which(
                 fileSizes/1e3 >= sizeRange_3[1] &
