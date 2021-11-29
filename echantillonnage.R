@@ -83,7 +83,7 @@ for(sono in sonometres)
     # Classifier la liste des fichiers dans les periodes de nidification et dans la journée (A1 - E6)
     # `groups` define en combien la period de temps (startDate - endDate) sera partagé
     sonoClass_dt <- classify_period(
-        dt = ono_dt,
+        dt = sono_dt,
         startDate = lubridate::as_date('2020-05-30'),
         endDate = lubridate::as_date('2020-07-23'),
         groups = 5
