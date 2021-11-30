@@ -53,11 +53,33 @@ sonometres_a_enlever <- c('', '')
 sonometres <- sonometres[!sonometres %in% sonometres_a_enlever]
 
 
+
+
+
+
+###############################################################################
+# Boucle par sonomètre pour la selection des fichiers avec les etapes:
+# 1. lister toutes les fichiers pour le sonomètre i
+# 2. Classer les fichiers en période de nidification + période de jour (Aube, Crépuscule et Nuit)
+# 3. Échantillons des fichiers audio par période de nidification et par période de jour
+# 4. Créez deux graphiques pdf dans le dossier du sonomètre i pour illustrer tous les audio disponibles et ceux sélectionnés
+# 5. Copier les fichiers sélectionnés dans le dossier de sortir
+# 6. Générer un journal descriptif au format texte des fichiers audio sélectionnés, avec un résumé descriptif du plan d'échantillonnage
+###############################################################################
+
+for(sono in sonometres)
+{
+    # imprimer dans la console le nom du sonometre pour vérifier le progress de la boucle
+    cat('\n\n', paste0(rep('#', 50), collapse = ''), '\n  Sonomètre:', sono, '\n', paste0(rep('#', 50), collapse = ''))
+
+
 # Créer un dossier 3 et 10 min pour chaque sonomètres
+    # À l'interieur de chaque Dossier_sonometre, il aurait un dossier 3 min et un 10 min. Les fichiers selectionnés seront mis dedans chacun de ces dossiers, et les fichiers supplementaire dans un sub dossier
 invisible(
     sapply(
         file.path(
-            songMeter_input,
+                outputFolder,
+                sono,
             c(
                 file.path(
                     c('audio_3min', 'audio_10min'),
@@ -70,29 +92,12 @@ invisible(
 )
 
 
-
-
-###############################################################################
-# Boucle par sonomètre pour la selection des fichiers avec les etapes:
-# 1. lister toutes les fichiers pour le sonomètre i
-# 2. Classifier les fichiers dans le periode de nidification + periode de la journée (Aurore, Crépuscule, et Nuit)
-# 3. Creer deux graphique pdf à l'interieur du dossier de chacun des sonomètres
-# 4. 
-# 5. 
-###############################################################################
-
-for(sono in sonometres)
-{
-    # imprimer dans la console le nom du sonometre pour vérifier le progress de la boucle
-    cat('\n\n', paste0(rep('#', 50), collapse = ''), '\n  Sonomètre:', sono, '\n', paste0(rep('#', 50), collapse = ''))
-
-
     # lister toutes les fichiers pour le sonometre
     # `sizeRange_*` defini les limites min et max de taille (en KB) pour les fichiers 3 minutes et 10 minutes
     sono_dt <- listAudio(
         Dir = file.path(inputFolder, sono),
         sizeRange_3 = c(30000, 40000),
-        sizeRange_10 = c(100000, 110000)
+        sizeRange_10 = c(100000, 130000)
     )
 
 
