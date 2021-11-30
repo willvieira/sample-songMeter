@@ -59,7 +59,7 @@ classify_period <- function(dt, startDate, endDate, groups = 5)
     if(!length(unique(lengths(nestingGroups))) == 1)
     {
         nestingPeriod <- rep(LETTERS[1:groups], lengths(nestingGroups))
-        cat(length(uniqueDays), 'days cannot be divided evenly in', groups, 'groups. Dividing the days into groups like:\n')
+        cat(length(uniqueDays), 'days cannot be divided evenly in', groups, 'groups. Dividing the days into groups as follows:\n')
         print(table(nestingPeriod))
     }else{
         nestingPeriod <- rep(LETTERS[1:groups], lengths(nestingGroups))
