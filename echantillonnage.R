@@ -121,22 +121,21 @@ invisible(
 
 
     # Générer une figure avec tous les fichiers distribué par periode de nidification et dans la journée
-    # `colorDay` définit si on va différencier (TRUE) ou non (FALSE) les périodes de la journée avec une couleur
+    # `sampled` pour ajouter de la couleur aux audios selectionnés
     # `outputFile` c'est le dossier avec le nom du fichier où la fonction va sauvegarder le pdf
     # la figure sera sauvegardé dedans le dossier du sonomètre
     plot_files(
         dt = sonoClass_dt,
-        colorDay = TRUE,
+        sampled = sono_echantillonne,
         outputFile = file.path(outputFolder, sono, 'fichiersAudio.pdf')
     )
 
 
-    # Générer une deuxième figure avec tous les fichiers + les fichiers echantillonés colorés
-    plot_files(
-        dt = sonoClass_dt,
+    # Copier les fichiers sélectionnés
+    move_files(
         sampled = sono_echantillonne,
-        colorDay = FALSE,
-        outputFile = file.path(outputFolder, sono, 'fichiersAudio_echantillon.pdf')
+        input = inputFolder,
+        output = outputFolder
     )
 
 

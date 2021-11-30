@@ -5,7 +5,7 @@
 ####################################################################
 
 
-plot_files <- function(dt, sampled = NULL, colorDay = FALSE, outputFile = NULL)
+plot_files <- function(dt, sampled = NULL, outputFile = NULL)
 {
     dt_tz <- lubridate::tz(dt$time[1])
 
@@ -19,7 +19,7 @@ plot_files <- function(dt, sampled = NULL, colorDay = FALSE, outputFile = NULL)
         (lubridate::hour(Time) * 3600) + (lubridate::minute(Time) * 60) + lubridate::second(Time)
 
     # function to convert to human readable date
-    sf <- suppressMessages(lubridate::stamp_date('Jan 17, 1999'))
+    sf <- suppressMessages(lubridate::stamp_date('Jan 17, 99'))
 
     # Get only day from time
     dt$day <- lubridate::date(dt$time)
@@ -54,16 +54,39 @@ plot_files <- function(dt, sampled = NULL, colorDay = FALSE, outputFile = NULL)
     axis(1, seqSeconds, labels = FALSE, line = -1)
 
     # day period colors
-    if(colorDay)
+    dayColors <- setNames(
+        c('#7f5539', '#cb997e', '#ddbea9', '#b7b7a4', '#9fa58d', '#63705c'),
+        1:6
+    )
+
+
+    if(!is.null(sampled))
     {
-        dayColors <- setNames(c('#7f5539', '#cb997e', '#ddbea9', '#b7b7a4', '#9fa58d', '#63705c'), 1:6)
-    }else{
-        dayColors <- setNames(rep('#7b999e', 6), 1:6)
+        sampleColors = setNames(c('blue', 'green'), c('main', 'over'))
+        for(tp in c('main', 'over'))
+        {
+            # filter sample type
+            sample_dt <- subset(sampled, sampleType == tp)
+            # get dt info of sampled files
+            sample_dt <- dt[match(sample_dt$fileName,dt$fileName), ]
+            
+            # add files as lines
+            for(i in 1:nrow(sample_dt))
+                lines(
+                    x = c(sample_dt$startRecord[i], sample_dt$endRecord[i]),
+                    y = c(sample_dt$day[i], sample_dt$day[i]),
+                    lwd = 12, col = sampleColors[tp]
+                )
+        }
     }
-       
+
     # add files as lines
     for(i in 1:nrow(dt))
-        lines(x = c(dt$startRecord[i], dt$endRecord[i]), y = c(dt$day[i], dt$day[i]), lwd = 8, col = dayColors[substring(dt$period[i], 2, 2)])
+        lines(
+            x = c(dt$startRecord[i], dt$endRecord[i]),
+            y = c(dt$day[i], dt$day[i]),
+            lwd = 8, col = dayColors[substring(dt$period[i], 2, 2)]
+        )
 
     # Label nesting periods
     nestingGroups <- gsub('1', '', grep('1', unique(dt$period), value = TRUE))
@@ -76,46 +99,14 @@ plot_files <- function(dt, sampled = NULL, colorDay = FALSE, outputFile = NULL)
         mtext(paste('Group', i), side = 2, line = 5.8, cex = 0.85, at = groupDayRange[1] + (groupDayRange[2] - groupDayRange[1])/2)
     }
 
-    # Label day periods (TODO)
-
-    # add sampled files if TRUE
-    if(!is.null(sampled))
-    {
-        sampleTypes <- c('main', 'over', 'atlas')
-        sampleColors <- setNames(c('#F95700FF', '#00A4CCFF', '#002a29'), sampleTypes)
-        for(tp in sampleTypes)
-        {
-            # filter sample type
-            sample_dt <- subset(sampled, sampleType == tp)
-            # get dt info of sampled files
-            sample_dt <- dt[match(sample_dt$fileName,dt$fileName), ]
-            
-            # add files as lines
-            for(i in 1:nrow(sample_dt))
-                lines(x = c(sample_dt$startRecord[i], sample_dt$endRecord[i]), y = c(sample_dt$day[i], sample_dt$day[i]), lwd = 8, col = sampleColors[tp])
-        }
-    }
-
     # legend
     if(!is.null(sampled))
     {
-        if(colorDay)
-        {
-            leg <- c('Main samples', 'Over samples', 'Atlas', 'Dawn1', 'Dawn2', 'Dawn3', 'Dusk', 'Night1', 'Night2')
-            legColors <- c('#F95700FF', '#00A4CCFF', '#002a29', dayColors)
-        }else{
-            leg <- c('Main samples', 'Over samples', 'Atlas', 'All files')
-            legColors <- c('#F95700FF', '#00A4CCFF', '#002a29', '#7b999e')
-        }
+        leg <- c('Main samples', 'Over samples', 'Dawn1', 'Dawn2', 'Dawn3', 'Dusk', 'Night1', 'Night2')
+        legColors <- c(sampleColors, dayColors)
     }else{
-        if(colorDay)
-        {
-            leg <- c('Dawn1', 'Dawn2', 'Dawn3', 'Dusk', 'Night1', 'Night2')
-            legColors <- dayColors
-        }else{
-            leg <- 'All files'
-            legColors <- '7b999e'
-        }
+        leg <- c('Dawn1', 'Dawn2', 'Dawn3', 'Dusk', 'Night1', 'Night2')
+        legColors <- dayColors
     }
 
     legend((max(seqSeconds) - min(seqSeconds))/2, seqDays[1], legend = leg, lty = 1, lwd = 6, col = legColors, bty = 'n', cex = 0.75)
