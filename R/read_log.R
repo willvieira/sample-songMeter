@@ -128,12 +128,12 @@ read_log <- function(file)
 #   - sizeRange_3: vector of minimum and maximum range of size for 3 min files
 #   - sizeRange_10: vector of minimum and maximum range of size for 10 min files
 # Return data.frame similar to log
-listAudio <- function(Dir = '.', sizeRange_3 = NA, sizeRange_10 = NA)
+listAudio <- function(input, songMeter, sizeRange_3 = NA, sizeRange_10 = NA)
 {
-    files <- dir(Dir, pattern = '.wav')
+    files <- dir(file.path(input, songMeter), pattern = '.wav')
 
     # get size of files
-    fileSizes <- file.size(file.path(Dir, files))
+    fileSizes <- file.size(file.path(input, songMeter, files))
 
     # Filter files within size range in Kb
     
@@ -165,7 +165,8 @@ listAudio <- function(Dir = '.', sizeRange_3 = NA, sizeRange_10 = NA)
     # calculate recording time based on file size (and sample rate and bits)
     audio1 <- tuneR::readWave(
         file.path(
-            Dir,
+            input,
+            songMeter,
             files[which(fileSizes/1e3 > 5000)[1]]
         )
     )
@@ -173,11 +174,12 @@ listAudio <- function(Dir = '.', sizeRange_3 = NA, sizeRange_10 = NA)
         (audio1@samp.rate * (audio1@bit/8) * ifelse(audio1@stereo, 2, 1))
 
 
-    cat(    '\n\n', length(files), 'files were found for the song meter:', Dir, '\n\n')
+    cat(    '\n\n', length(files), 'files were found for the song meter:', songMeter, '\n\n')
 
     data.frame(
         time = formatedTime,
-        songMeter = Dir,
+        input = input,
+        songMeter = songMeter,
         fileName = files,
         fileSize = fileSizes/1e3,
         duration = round(duration, 1))

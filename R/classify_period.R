@@ -27,8 +27,6 @@
 # an extra columns with 24h period and nesting period
 classify_period <- function(dt, startDate, endDate, groups = 5)
 {
-    songMeter <- dt$songMeter[1]
-
     # Get days of sample
     uniqueDays <- unique(lubridate::date(dt$time))
 
@@ -44,7 +42,7 @@ classify_period <- function(dt, startDate, endDate, groups = 5)
     uniqueDays <- uniqueDays[uniqueDays >= startDate & uniqueDays <= endDate]
 
     # Location and time zone from song meter to be used to estimate the daily sunrise and sunset time
-    logFile <- read_log(dir(songMeter, full.names = TRUE, pattern = '.txt')[1])
+    logFile <- read_log(dir(file.path(dt$input[1], dt$songMeter[1]), full.names = TRUE, pattern = '.txt')[1])
     lat <- unique(logFile$latitude)
     lon <- unique(logFile$longitude)
     dtTZ <- lubridate::tz(dt$time[1])
