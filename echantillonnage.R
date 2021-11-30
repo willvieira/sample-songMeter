@@ -83,7 +83,7 @@ invisible(
             c(
                 file.path(
                     c('audio_3min', 'audio_10min'),
-                    'Echantillons_supplementaires'
+                        'selection_remplacement'
                 )
             )
         ),
@@ -95,7 +95,8 @@ invisible(
     # lister toutes les fichiers pour le sonometre
     # `sizeRange_*` defini les limites min et max de taille (en KB) pour les fichiers 3 minutes et 10 minutes
     sono_dt <- listAudio(
-        Dir = file.path(inputFolder, sono),
+        input = inputFolder,
+        songMeter = sono,
         sizeRange_3 = c(30000, 40000),
         sizeRange_10 = c(100000, 130000)
     )
@@ -113,7 +114,7 @@ invisible(
 
     # Échantillonner les fichiers
     # `sampleSize` et `overSample` pour chaque period de la journée ET groupe
-    sono_echantillonne <- sample_files(
+    sono_selection <- sample_files(
         dt = sonoClass_dt,
         sampleSize = 1,
         overSample = 1
@@ -126,14 +127,14 @@ invisible(
     # la figure sera sauvegardé dedans le dossier du sonomètre
     plot_files(
         dt = sonoClass_dt,
-        sampled = sono_echantillonne,
+        sampled = sono_selection,
         outputFile = file.path(outputFolder, sono, 'fichiersAudio.pdf')
     )
 
 
     # Copier les fichiers sélectionnés
     move_files(
-        sampled = sono_echantillonne,
+        sampled = sono_selection,
         input = inputFolder,
         output = outputFolder
     )

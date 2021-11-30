@@ -35,7 +35,7 @@ move_files <- function(sampled, input, output)
             sampled$sampleType == 'main',
             sampled$fileName,
             paste0(
-                'Echantillons_supplementaires/',
+                'selection_remplacement/',
                 sampled$fileName
             )
         )
