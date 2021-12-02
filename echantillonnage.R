@@ -16,6 +16,7 @@ source('R/classify_period.R')
 source('R/sample_record.R')
 source('R/plot_files.R')
 source('R/move_samples.R')
+source('R/make_log.R')
 
 
 
@@ -73,23 +74,23 @@ for(sono in sonometres)
     cat('\n\n', paste0(rep('#', 50), collapse = ''), '\n  Sonomètre:', sono, '\n', paste0(rep('#', 50), collapse = ''))
 
 
-# Créer un dossier 3 et 10 min pour chaque sonomètres
+    # Créer un dossier 3 et 10 min pour chaque sonomètres
     # À l'interieur de chaque Dossier_sonometre, il aurait un dossier 3 min et un 10 min. Les fichiers selectionnés seront mis dedans chacun de ces dossiers, et les fichiers supplementaire dans un sub dossier
-invisible(
-    sapply(
-        file.path(
+    invisible(
+        sapply(
+            file.path(
                 outputFolder,
                 sono,
-            c(
-                file.path(
-                    c('audio_3min', 'audio_10min'),
+                c(
+                    file.path(
+                        c('audio_3min', 'audio_10min'),
                         'selection_remplacement'
+                    )
                 )
-            )
-        ),
-        dir.create, recursive = TRUE
+            ),
+            dir.create, recursive = TRUE
+        )
     )
-)
 
 
     # lister toutes les fichiers pour le sonometre
@@ -140,11 +141,11 @@ invisible(
     )
 
 
-    # Déplacer les fichiers
-    move_files(
-        sampled = sono_echantillonne,
-        input = inputFolder,
-        output = outputFolder
+    # Générer la liste des fichiers selectionés
+    make_list(
+        sampled = sono_selection,
+        nbValidation = 5,
+        output = file.path(outputFolder, sono)
     )
 
 }

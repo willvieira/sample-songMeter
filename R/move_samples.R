@@ -53,12 +53,18 @@ move_files <- function(sampled, input, output)
     # Message
     if(all(moveResults))
     {
-        cat('   All', length(moveResults), 'files have been moved successfully!\n\n\n')
+        logMsg(
+            paste('All', length(moveResults), 'files have been moved successfully!')
+        )
     }else{
         msg <- 'We had problems moving the following files:\n'
         missingRows <- sampled[which(!moveResults), c('songMeter', 'fileName')]
-        cat(msg,
+        msg <- paste0(
+            msg,
             paste0(paste0(' - ',
-                    apply(missingRows, 1, function(x) file.path(x[1], x[2]))), collapse = '\n'), '\n\n')
+                    apply(missingRows, 1, function(x) file.path(x[1], x[2]))), collapse = '\n')
+        )
+        
+        logMsg(msg)
     }
 }

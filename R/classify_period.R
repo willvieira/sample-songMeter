@@ -27,6 +27,16 @@
 # an extra columns with 24h period and nesting period
 classify_period <- function(dt, startDate, endDate, groups = 5)
 {
+    # log arguments into temp file
+    logMsg(
+        paste0(
+            'startDate:', startDate, '\n',
+            'endDate:', endDate, '\n',
+            'groups:', groups
+        ),
+        console = FALSE
+    )
+
     # Get days of sample
     uniqueDays <- unique(lubridate::date(dt$time))
 
@@ -35,8 +45,11 @@ classify_period <- function(dt, startDate, endDate, groups = 5)
     seqAllDays <- seq(startDate, endDate, by = 'day')
     matchDays <- seqAllDays %in% uniqueDays
     if(!all(matchDays))
-         cat(paste('There are missing days in the song meter. These are the days in which no file was recorded:\n',
-                     paste0(paste0(' - ', seqAllDays[!matchDays]), collapse = '\n')), '\n\n')
+         logMsg(
+             paste0(
+                'There are missing days in the song meter. These are the days in which no file was recorded:\n',
+                paste0(paste0(' - ', seqAllDays[!matchDays]), collapse = '\n'))
+        )
     
     # filter uniqueDays within start and end dates
     uniqueDays <- uniqueDays[uniqueDays >= startDate & uniqueDays <= endDate]
@@ -57,8 +70,12 @@ classify_period <- function(dt, startDate, endDate, groups = 5)
     if(!length(unique(lengths(nestingGroups))) == 1)
     {
         nestingPeriod <- rep(LETTERS[1:groups], lengths(nestingGroups))
-        cat(length(uniqueDays), 'days cannot be divided evenly in', groups, 'groups. Dividing the days into groups as follows:\n')
-        print(table(nestingPeriod))
+
+        logMsg(
+            paste(length(uniqueDays), 'days cannot be divided evenly in', groups, 'groups. Dividing the days into groups as follows:\n',
+            paste0(names(table(nestingPeriod)), collapse = ' | '), '\n',
+            paste0(table(nestingPeriod), collapse = ' | '))
+        )
     }else{
         nestingPeriod <- rep(LETTERS[1:groups], lengths(nestingGroups))
     }

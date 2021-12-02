@@ -130,7 +130,23 @@ read_log <- function(file)
 # Return data.frame similar to log
 listAudio <- function(input, songMeter, sizeRange_3 = NA, sizeRange_10 = NA)
 {
+    # log arguments into temp file
+    logMsg(
+        paste0(
+            'songMeter:', songMeter, '\n',
+            'sizeRange_3:', paste(sizeRange_3, collapse = ','), '\n',
+            'sizeRange_10:', paste(sizeRange_10, collapse = ',')
+        ),
+        console = FALSE
+    )
+
+
     files <- dir(file.path(input, songMeter), pattern = '.wav')
+
+    # log
+    logMsg(
+        paste('A total of', length(files), '.wav files were found in the song meter folder')
+    )
 
     # get size of files
     fileSizes <- file.size(file.path(input, songMeter, files))
@@ -151,10 +167,10 @@ listAudio <- function(input, songMeter, sizeRange_3 = NA, sizeRange_10 = NA)
             files <- files[toKeep]
             fileSizes <- fileSizes[toKeep]
         }else{
-            cat('Ignore filtering files by size because at least one of the `sizeRange_` arguments are` NA`\n')
+            logMsg('Ignore filtering files by size because at least one of the `sizeRange_` arguments are `NA`')
         }
     }else{
-        cat('Ignore filtering files by size because at least one of the `sizeRange_` arguments are` NA`\n')
+        logMsg('Ignore filtering files by size because at least one of the `sizeRange_` arguments are `NA`')
     }
 
     ## Extract time from file name
@@ -174,7 +190,11 @@ listAudio <- function(input, songMeter, sizeRange_3 = NA, sizeRange_10 = NA)
         (audio1@samp.rate * (audio1@bit/8) * ifelse(audio1@stereo, 2, 1))
 
 
-    cat(    '\n\n', length(files), 'files were found for the song meter:', songMeter, '\n\n')
+    # log
+    logMsg(
+        paste('Saving', length(files), 'after filtering (if specified)')
+    )
+
 
     data.frame(
         time = formatedTime,

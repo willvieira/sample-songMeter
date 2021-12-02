@@ -23,6 +23,15 @@
 # Output: dt file with two extra columns defining sample and extraSample rows [0, 1]
 sample_files <- function(dt, sampleSize = 1, overSample = 1)
 {
+    # log arguments into temp file
+    logMsg(
+        paste0(
+            'sampleSize:', sampleSize, '\n',
+            'overSample:', overSample
+        ),
+        console = FALSE
+    )
+
     groups <- unique(dt$period)
 
     # split data into groups
@@ -35,7 +44,7 @@ sample_files <- function(dt, sampleSize = 1, overSample = 1)
         missingSamples <- names(which(nbByGroup < (sampleSize + overSample)))
         msg <- paste0('The following groups do not have enough files to sample (SampleSize + overSample = ', sampleSize + overSample, '):\n')
         msg <- paste0(msg, paste0(paste0('- ', missingSamples, ' = ', nbByGroup[missingSamples]), collapse = '\n'))
-        warning(msg)
+        logMsg(msg)
     }
 
     # data frame to store sampled rows
@@ -122,13 +131,14 @@ sample_files <- function(dt, sampleSize = 1, overSample = 1)
     # specialDt$sampleType <- 'atlas'
     # sampled <- rbind(sampled, specialDt)
 
-    # Return message
+    # log
     msg <- paste0(' For the ', length(groups), ' nesting and day periods:\n')
     msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'main')), ' main samples\n')
-    msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'over')), ' over samples\n')
+    msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'over')), ' over samples')
     # msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'atlas')), ' atlas samples\n')
-    cat(msg)    
     
+    logMsg(msg)
+
     return( sampled )
 
 }
