@@ -125,17 +125,17 @@ read_log <- function(file)
 # List audio files from a specific song meter directory
 # Input:
 #   - directory
-#   - sizeRange_3: vector of minimum and maximum range of size for 3 min files
-#   - sizeRange_10: vector of minimum and maximum range of size for 10 min files
+#   - durationRange_3: vector of minimum and maximum range of size for 3 min files
+#   - durationRange_10: vector of minimum and maximum range of size for 10 min files
 # Return data.frame similar to log
-listAudio <- function(input, songMeter, sizeRange_3 = NA, sizeRange_10 = NA)
+listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 = NA)
 {
     # log arguments into temp file
     logMsg(
         paste0(
             'songMeter:', songMeter, '\n',
-            'sizeRange_3:', paste(sizeRange_3, collapse = ','), '\n',
-            'sizeRange_10:', paste(sizeRange_10, collapse = ',')
+            'durationRange_3:', paste(durationRange_3, collapse = ','), '\n',
+            'durationRange_10:', paste(durationRange_10, collapse = ',')
         ),
         console = FALSE
     )
@@ -151,32 +151,6 @@ listAudio <- function(input, songMeter, sizeRange_3 = NA, sizeRange_10 = NA)
     # get size of files
     fileSizes <- file.size(file.path(input, songMeter, files))
 
-    # Filter files within size range in Kb
-    
-    if( !is.na(sizeRange_3[1]) )
-    {
-        if( !is.na(sizeRange_10[1]) )
-        {
-            toKeep <- which(
-                fileSizes/1e3 >= sizeRange_3[1] &
-                fileSizes/1e3 <= sizeRange_3[2] |
-                fileSizes/1e3 >= sizeRange_10[1] &
-                fileSizes/1e3 <= sizeRange_10[2]
-            )
-
-            files <- files[toKeep]
-            fileSizes <- fileSizes[toKeep]
-        }else{
-            logMsg('Ignore filtering files by size because at least one of the `sizeRange_` arguments are `NA`')
-        }
-    }else{
-        logMsg('Ignore filtering files by size because at least one of the `sizeRange_` arguments are `NA`')
-    }
-
-    ## Extract time from file name
-    # remove extension and recorder name
-    yearHour <- gsub('^[^_]*_', '', gsub('.wav', '', files))
-    formatedTime <- lubridate::ymd_hms(yearHour, tz = 'America/Toronto') # TODO
 
     # calculate recording time based on file size (and sample rate and bits)
     audio1 <- tuneR::readWave(
@@ -188,6 +162,35 @@ listAudio <- function(input, songMeter, sizeRange_3 = NA, sizeRange_10 = NA)
     )
     duration <- fileSizes/
         (audio1@samp.rate * (audio1@bit/8) * ifelse(audio1@stereo, 2, 1))
+
+
+    # Filter files within size range in Kb    
+    if( !is.na(durationRange_3[1]) )
+    {
+        if( !is.na(durationRange_10[1]) )
+        {
+            toKeep <- which(
+                duration >= durationRange_3[1] &
+                duration <= durationRange_3[2] |
+                duration >= durationRange_10[1] &
+                duration <= durationRange_10[2]
+            )
+
+            files <- files[toKeep]
+            fileSizes <- fileSizes[toKeep]
+            duration <- duration[toKeep]
+        }else{
+            logMsg('Ignore filtering files by duration because at least one of the `durationRange_` arguments are `NA`')
+        }
+    }else{
+        logMsg('Ignore filtering files by duration because at least one of the `durationRange_` arguments are `NA`')
+    }
+
+
+    ## Extract time from file name
+    # remove extension and recorder name
+    yearHour <- gsub('^[^_]*_', '', gsub('.wav', '', files))
+    formatedTime <- lubridate::ymd_hms(yearHour, tz = 'America/Toronto') # TODO
 
 
     # log
@@ -202,6 +205,7 @@ listAudio <- function(input, songMeter, sizeRange_3 = NA, sizeRange_10 = NA)
         songMeter = songMeter,
         fileName = files,
         fileSize = fileSizes/1e3,
-        duration = round(duration, 1))
+        duration = duration
+    )
 
 }

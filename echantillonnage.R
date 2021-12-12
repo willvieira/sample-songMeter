@@ -98,8 +98,8 @@ for(sono in sonometres)
     sono_dt <- listAudio(
         input = inputFolder,
         songMeter = sono,
-        sizeRange_3 = c(30000, 40000),
-        sizeRange_10 = c(100000, 130000)
+        durationRange_3 = c(175, 185),
+        durationRange_10 = c(595, 605)
     )
 
 
