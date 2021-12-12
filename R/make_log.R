@@ -30,16 +30,22 @@ make_list <- function(sampled, nbValidation, output)
     # create 0 - 1 columns to define if sample is main or over
     sampled$selectionEcoute <- ifelse(sampled$sampleType == 'main', 1, 0)
     sampled$selectionRemplecement <- ifelse(sampled$sampleType == 'over', 1, 0)
-    
-    
+
+
     # sample from main files to validation
     sampled$selectionValidation <- 0
     toValidate <- sample(which(sampled$selectionEcoute == 1), nbValidation)
     sampled$selectionValidation[toValidate] <- 1
 
 
+    # sample one 10 min file for Atlas
+    sampled$Atlas <- 0
+    atlas <- sample(which(sampled$selectionEcoute == 1 & sampled$duration == 600), 1)
+    sampled$Atlas[atlas] <- 1
+
+
     # Filter columns
-    sampled_export <- sampled[, c('songMeter', 'fileName_ne', 'selectionEcoute', 'selectionRemplecement', 'selectionValidation')]
+    sampled_export <- sampled[, c('songMeter', 'fileName_ne', 'selectionEcoute', 'selectionRemplecement', 'selectionValidation', 'Atlas')]
 
 
     # rename columns
@@ -61,7 +67,7 @@ logMsg <- function(msg, fileName = file.path(outputFolder, sono, 'selection_log.
 {
     # firt break a line at the end
     msg_break <- paste0(msg, '\n')
-    
+
     # print console
     if(console)
         cat(msg_break)
