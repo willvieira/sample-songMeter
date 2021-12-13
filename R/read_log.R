@@ -134,10 +134,13 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
     logMsg(
         paste0(
             'songMeter:', songMeter, '\n',
-            'durationRange_3:', paste(durationRange_3, collapse = ','), '\n',
-            'durationRange_10:', paste(durationRange_10, collapse = ',')
+            paste0(rep('#', 50), collapse = ''), '\n\n',
+            'List audio:\n',
+            'durationRange_3: ', paste(durationRange_3, collapse = ','), '\n',
+            'durationRange_10: ', paste(durationRange_10, collapse = ',')
         ),
-        console = FALSE
+        console = FALSE,
+        append = FALSE
     )
 
 

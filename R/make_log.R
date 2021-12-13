@@ -63,7 +63,7 @@ make_list <- function(sampled, nbValidation, output)
 
 
 # Function to print message to console and log file at the same time
-logMsg <- function(msg, fileName = file.path(outputFolder, sono, 'selection_log.txt'), console = TRUE)
+logMsg <- function(msg, fileName = file.path(outputFolder, sono, 'selection_log.txt'), console = TRUE, append = TRUE)
 {
     # firt break a line at the end
     msg_break <- paste0(msg, '\n')
@@ -76,6 +76,6 @@ logMsg <- function(msg, fileName = file.path(outputFolder, sono, 'selection_log.
     cat(
         msg_break,
         file = fileName,
-        append = TRUE
+        append = append
     )
 }
