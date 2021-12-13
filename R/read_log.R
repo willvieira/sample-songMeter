@@ -212,3 +212,24 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
     )
 
 }
+
+
+
+
+# Function to read and format ARU program code
+# Input: excel file
+# output: data.frame
+read_program <- function(File)
+{
+    # read excel file
+    df <- readxl::read_excel(File)
+
+    # put all col names to lower to avoid typo
+    names(df) <- tolower(names(df))
+
+    # class some columns
+    df$datedebut <- lubridate::ymd(df$datedebut)
+    df$datefin <- lubridate::ymd(df$datefin)
+
+    return ( as.data.frame(df) )
+}
