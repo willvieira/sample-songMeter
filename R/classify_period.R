@@ -159,3 +159,47 @@ classify_period <- function(dt, startDate, endDate, groups = 5)
 
     return( dt )
 }
+
+
+
+
+# # Function to read and format ARU program code
+# # Input: excel file
+# # output: data.frame
+# read_program <- function(File, ProgCode)
+# {
+
+#     if (!require('tidyr')) install.packages('tidyr')
+
+#     # read excel file
+#     df <- readxl::read_excel(File)
+
+#     # split all `on` and `off` columns with `_`  to pivot can work latter
+#     names(df)[grep('On|Off', names(df))] <- sapply(
+#         grep('On|Off', names(df), value = TRUE),
+#         function(x) {
+#             n = nchar(x)
+#             suf = substr(x, n, n)
+#             pref = gsub(suf, '', x)
+#             paste0(pref, '_', suf)
+#         }
+#     )
+
+
+#     # pivot all `onX` and `offX` to two columns:
+#     # event (On or Off)
+#     # event_seq (1, 2, ... i)
+#     df2 <- pivot_longer(
+#         df,
+#         cols = c(starts_with('On'), starts_with('Off')),
+#         names_to = c('event', 'event_seq'),
+#         names_sep = '_',
+#         values_to = 'value'
+#     ) %>%
+#     na.omit() %>%å
+#     as.data.frame()
+    
+
+#     return (df2)
+
+# }
