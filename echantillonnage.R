@@ -8,6 +8,10 @@ if (!require('suncalc')) install.packages('suncalc')
 if (!require('tuneR')) install.packages('tuneR')
 if (!require('lutz')) install.packages('lutz')
 if (!require('rstudioapi')) install.packages('rstudioapi')
+if (!require('readxl')) install.packages('readxl')
+if (!require('yaml')) install.packages('yaml')
+
+
 
 # Telecharger les fonctions necessaires
 source('R/identify_recorder.R')
@@ -32,6 +36,13 @@ inputFolder <- rstudioapi::selectDirectory()
 # Définir le dossier de sortir (où sauvegarder les audio sélectionnés?)
 outputFolder <- rstudioapi::selectDirectory()
 
+
+
+################################################################################
+# Charger le fichier Excel de programation des enregistreur
+################################################################################
+
+ARU_program <- read_program(rstudioapi::selectFile())
 
 
 
@@ -74,6 +85,15 @@ for(sono in sonometres)
     cat('\n\n', paste0(rep('#', 50), collapse = ''), '\n  Sonomètre:', sono, '\n', paste0(rep('#', 50), collapse = ''))
 
 
+    # read song meter log
+    sono_info <- yaml::read_yaml(
+        file.path(
+            inputFolder,
+            sono,
+            'log.yaml'
+        )
+    )
+
     # Créer un dossier 3 et 10 min pour chaque sonomètres
     # À l'interieur de chaque Dossier_sonometre, il aurait un dossier 3 min et un 10 min. Les fichiers selectionnés seront mis dedans chacun de ces dossiers, et les fichiers supplementaire dans un sub dossier
     invisible(
@@ -107,9 +127,9 @@ for(sono in sonometres)
     # `groups` define en combien la period de temps (startDate - endDate) sera partagé
     sonoClass_dt <- classify_period(
         dt = sono_dt,
-        startDate = lubridate::as_date('2020-05-30'),
-        endDate = lubridate::as_date('2020-07-23'),
-        groups = 5
+        program = ARU_program,
+        info = sono_info,
+        nesting_groups = 5
     )
 
 

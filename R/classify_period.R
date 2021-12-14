@@ -25,24 +25,42 @@
 #   - groups: number of groups within date range. If we have 44 days and 4 groups, each group will have 11 days.
 # Output: data.frame with same structure as the output of listAudio_sm4(), with
 # an extra columns with 24h period and nesting period
-classify_period <- function(dt, startDate, endDate, groups = 5)
+classify_period <- function(dt, program, info, nesting_groups = 5)
 {
+    # subset program to specific song meter
+    program <- subset(program, inventairecode == info$InventaireCode)
+
+
+    # save program
+    write.csv2(
+        program,
+        file.path(outputFolder, unique(dt$songMeter), 'sample_program.csv'),
+        row.names = FALSE
+    )
+
+
     # log arguments into temp file
     logMsg(
         paste0(
-            'startDate:', startDate, '\n',
-            'endDate:', endDate, '\n',
-            'groups:', groups
+            '\nClassify audio:\n',
+            'nesting_groups: ', nesting_groups
         ),
         console = FALSE
     )
 
+
     # Get days of sample
     uniqueDays <- unique(lubridate::date(dt$time))
 
+
     # Create a sequence of days from `startDate` to `endDate` and
     # check if uniqueDays found in dt are present in the sequence
-    seqAllDays <- seq(startDate, endDate, by = 'day')
+    seqAllDays <- seq(
+        min(program$datedebut),
+        max(program$datefin),
+        by = 'day'
+    )
+    
     matchDays <- seqAllDays %in% uniqueDays
     if(!all(matchDays))
          logMsg(
@@ -52,154 +70,160 @@ classify_period <- function(dt, startDate, endDate, groups = 5)
         )
     
     # filter uniqueDays within start and end dates
-    uniqueDays <- uniqueDays[uniqueDays >= startDate & uniqueDays <= endDate]
+    uniqueDays <- uniqueDays[
+        uniqueDays >= min(program$datedebut) &
+        uniqueDays <= max(program$datefin)
+    ]
 
-    # Location and time zone from song meter to be used to estimate the daily sunrise and sunset time
-    logFile <- read_log(dir(file.path(dt$input[1], dt$songMeter[1]), full.names = TRUE, pattern = '.txt')[1])
-    lat <- unique(logFile$latitude)
-    lon <- unique(logFile$longitude)
-    dtTZ <- lubridate::tz(dt$time[1])
 
-    # add an empty column in dt to define the 24h AND nesting periods (e.g. A1)
-    dt$period <- rep(NA, nrow(dt))
-    
     # Define groups for nesting period (A, B, C, D, ...)
-    nestingGroups <- split(uniqueDays, cut(uniqueDays, groups))
+    nestingGroups <- split(uniqueDays, cut(uniqueDays, nesting_groups))
 
     # Check if nesting groups are evenly split
     if(!length(unique(lengths(nestingGroups))) == 1)
     {
-        nestingPeriod <- rep(LETTERS[1:groups], lengths(nestingGroups))
+        nestingPeriod <- rep(LETTERS[1:nesting_groups], lengths(nestingGroups))
 
         logMsg(
-            paste(length(uniqueDays), 'days cannot be divided evenly in', groups, 'groups. Dividing the days into groups as follows:\n',
+            paste(length(uniqueDays), 'days cannot be divided evenly in', nesting_groups, 'nesting groups. Dividing the days into groups as follows:\n',
             paste0(names(table(nestingPeriod)), collapse = ' | '), '\n',
             paste0(table(nestingPeriod), collapse = ' | '))
         )
     }else{
-        nestingPeriod <- rep(LETTERS[1:groups], lengths(nestingGroups))
+        nestingPeriod <- rep(LETTERS[1:nesting_groups], lengths(nestingGroups))
     }
+
+
+    # add an empty column in dt to define the 24h AND nesting periods (e.g. A1)
+    dt$period <- NA
+
 
     # Now for each day, split in the 24h (day) period
     for(Day in 1:length(uniqueDays))
-    {
-        # Calculate sunrise an sunset time for the specific day and location
-        sunlight <- suncalc::getSunlightTimes(date = uniqueDays[Day],
-                                              lat = lat, lon = lon,
-                                              keep = c('sunrise', 'sunset'),
-                                              tz = dtTZ)
-
-        # match calculated sunset and sunrise with song meter `sunset` and `sunrise`
-        # If the difference between all files and the calculated sunset and sunrise is smaller than 5 minutes
-        # I will classify the target file as the observed sunset/sunrise, if not I keep using the calculated values (because sometimes there are missing files)
-        if(min(abs(sunlight$sunrise - dt$time)) < lubridate::minutes(5))
+    {     
+        # get sunrise and sunset for the day
+        sunlight <- suncalc::getSunlightTimes(
+            date = uniqueDays[Day],
+            lat = info$Lat_DegDecValide,
+            lon = info$Long_DegDecValide,
+            keep = c('sunrise', 'sunset'),
+            tz = lubridate::tz(dt$time[1])
+        )
+   
+        # classify audio for each nesting period
+        for(dayPeriod in program$sousprog)
         {
-            sunrise <- dt$time[which.min(abs(sunlight$sunrise - dt$time))]
-        }else{
-            sunrise <- sunlight$sunrise
-        }
-
-        if(min(abs(sunlight$sunset - dt$time)) < lubridate::minutes(5))
-        {
-            sunset <- dt$time[which.min(abs(sunlight$sunset - dt$time))]
-        }else{
-            sunset <- sunlight$sunset
-        }
-
-        
-        
-        # Calculate the time limits of each of the 3 groups within a day (Dawn, dusk, Nigth)
-        
-        # Extra time of 10 minutes to make sure all files are within the min/max range
-        # So if song meter starts 1h before sunrise, I will look for files within 1h10min before
-        extraTime <- lubridate::minutes(10)
-
-        # Dawn 1 [sunrise - 1h, sunrise + 0.5h]
-        dawnRows1 <- which(dt$time > (sunrise - lubridate::hours(1) - extraTime) &
-                           dt$time < (sunrise + lubridate::minutes(30) + extraTime))
-
-        # Dawn 2 [sunrise + 1h, sunrise + 2.5h]
-        dawnRows2 <- which(dt$time > (sunrise + lubridate::hours(1) - extraTime) &
-                           dt$time < (sunrise + lubridate::hours(2) + lubridate::minutes(30) + extraTime))
-
-        # Dawn 3 [sunrise + 3h, sunrise + 4.5h]
-        dawnRows3 <- which(dt$time > (sunrise + lubridate::hours(3) - extraTime) &
-                           dt$time < (sunrise + lubridate::hours(4) + lubridate::minutes(30) + extraTime))
-
-        # Dusk [sunset - 0.5h, sunset + 0.5h]
-        duskRows <- which(dt$time > (sunset - lubridate::minutes(30) - extraTime) &
-                          dt$time < (sunset + lubridate::minutes(30) + extraTime))
-        
-        # Nigth 1 [sunset + 1.5h, sunset + 2.5h] <- probably a mistake with camera set, adding 30 minutes
-        nightRows1 <- which(dt$time > (sunset + lubridate::hours(1) + lubridate::minutes(30) - extraTime) &
-                            dt$time < (sunset + lubridate::hours(2) + lubridate::minutes(40) + extraTime))
-
-        # Nigth 2 [sunset + 3.5h, sunset + 4.5h] <- probably a mistake with camera set, adding 30 minutes
-        nightRows2 <- which(dt$time > (sunset + lubridate::hours(3) + lubridate::minutes(30) - extraTime) &
-                            dt$time < (sunset + lubridate::hours(5) + lubridate::minutes(10) + extraTime))
-
-
-        dt$period[c(dawnRows1, dawnRows2, dawnRows3, duskRows, nightRows1, nightRows2)] <-
-            paste0(nestingPeriod[Day],
-            c(rep(1, length(dawnRows1)),
-                rep(2, length(dawnRows2)),
-                rep(3, length(dawnRows3)),
-                rep(4, length(duskRows)),
-                rep(5, length(nightRows1)),
-                rep(6, length(nightRows2))))
+            program_p <- subset(program, sousprog == dayPeriod)
             
-        # Check if we have all 24h periods (12 + 3 + 4)
-        # if(any(!c(length(c(dawnRows1, dawnRows2, dawnRows3)), length(duskRows), length(c(nightRows1, nightRows2))) == c(12, 3, 4)))
-        #     warning(paste(songMeter, ': Day', uniqueDays[Day], 'is missing a record on the period',
-        #         c('Dawn', 'Dusk', 'Nigth')[which(!(c(length(c(dawnRows1, dawnRows2, dawnRows3)), length(duskRows), length(c(nightRows1, nightRows2))) == c(12, 3, 4)))], '.\n'))
+            # is the specific `Day` within the range of days?
+            if(uniqueDays[Day] %in% seq(program_p$datedebut, program_p$datefin, by = 'day')) {
+                
+                time_range <- program_range(
+                    sunlight = sunlight,
+                    program = program_p
+                )
+
+                periodRows <- which(
+                    dt$time > time_range$startTime &
+                    dt$time < time_range$endTime
+                )
+
+                dt$period[periodRows] <- paste0(
+                    dayPeriod,
+                    '_',
+                    nestingPeriod[Day]
+                )
+            }
+        }
     }
 
     # remove lines with NA (period of time out of the start and end day range)
-    dt <- dt[which(!is.na(dt$period)), ]
+    #dt <- dt[which(!is.na(dt$period)), ]
 
     return( dt )
 }
 
 
 
-
-# # Function to read and format ARU program code
-# # Input: excel file
-# # output: data.frame
-# read_program <- function(File, ProgCode)
-# {
-
-#     if (!require('tidyr')) install.packages('tidyr')
-
-#     # read excel file
-#     df <- readxl::read_excel(File)
-
-#     # split all `on` and `off` columns with `_`  to pivot can work latter
-#     names(df)[grep('On|Off', names(df))] <- sapply(
-#         grep('On|Off', names(df), value = TRUE),
-#         function(x) {
-#             n = nchar(x)
-#             suf = substr(x, n, n)
-#             pref = gsub(suf, '', x)
-#             paste0(pref, '_', suf)
-#         }
-#     )
+# function to get range of max and min time given (sunset/sunrise) and program set
+program_range <- function(sunlight, program)
+{
+    # Extra time of 10 minutes to make sure all files are within the min/max range
+    extraTime <- lubridate::minutes(5)
 
 
-#     # pivot all `onX` and `offX` to two columns:
-#     # event (On or Off)
-#     # event_seq (1, 2, ... i)
-#     df2 <- pivot_longer(
-#         df,
-#         cols = c(starts_with('On'), starts_with('Off')),
-#         names_to = c('event', 'event_seq'),
-#         names_sep = '_',
-#         values_to = 'value'
-#     ) %>%
-#     na.omit() %>%å
-#     as.data.frame()
-    
+    # get start time
+    if(substr(program$heuredebut, 1, 4) == 'SSET') {
+        if(substr(program$heuredebut, 5, 5) == '+') {
+            startTime <- 
+                sunlight$sunset +
+                HMS(program$heuredebut)
+        }else{
+            startTime <- 
+                sunlight$sunset -
+                HMS(program$heuredebut)
+        }
+    }else if(substr(program$heuredebut, 1, 4) == 'SRIS') {
+        if(substr(program$heuredebut, 5, 5) == '+') {
+            startTime <-
+                sunlight$sunrise +
+                HMS(program$heuredebut)
+        }else{
+            startTime <-
+                sunlight$sunrise -
+                HMS(program$heuredebut)
+       }
+    }else{
+        stop('No pattern "SSET" or "SRIS" found in `heuredebut`')
+    }
 
-#     return (df2)
+    # get end time
+    if(substr(program$heurefin, 1, 4) == 'SSET') {
+        if(substr(program$heurefin, 5, 5) == '+') {
+            endTime <- 
+                sunlight$sunset +
+                HMS(program$heurefin)
+        }else{
+            endTime <- 
+                sunlight$sunset -
+                HMS(program$heurefin)
+        }
+    }else if(substr(program$heurefin, 1, 4) == 'SRIS') {
+        if(substr(program$heurefin, 5, 5) == '+') {
+            endTime <-
+                sunlight$sunrise +
+                HMS(program$heurefin)
+        }else{
+            endTime <-
+                sunlight$sunrise -
+                HMS(program$heurefin)
+       }
+    }else{
+        stop('No pattern "SSET" or "SRIS" found in `heurefin`')
+    }
 
-# }
+    return(
+        list(
+            startTime = startTime - extraTime,
+            endTime = endTime + extraTime
+        )
+    )
+}
+
+
+
+# function to extract hour, minute and seconds from string
+HMS <- function(string)
+{
+    if(nchar(string) != 11)
+        stop('Heuredebut/Heurefin does not have 11 characters (error in HMS function)')
+
+    # get everything after pattern "SSSS+"
+    hhmmss <- substr(string, 6, 11)
+
+    # split string by chuncks of two
+    hhmmss_split <- substring(hhmmss, seq(1, 5, 2), seq(2, 6, 2))
+
+    # put all together with `:` and transform in date format with lubridate
+    lubridate::hms(paste0(hhmmss_split, collapse = ':'))
+}
