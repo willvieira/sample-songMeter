@@ -28,7 +28,7 @@ move_files <- function(sampled, input, output)
     sampled$to <- file.path(
         songMeter_output,
         ifelse(
-            sampled$duration == 180,
+            round(sampled$duration, 0) == 180,
             'audio_3min', 'audio_10min'
         ),
         ifelse(
