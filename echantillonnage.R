@@ -151,7 +151,7 @@ for(sono in sonometres)
         sampled = sono_selection,
         outputFile = file.path(outputFolder, sono, 'fichiersAudio.pdf')
     )
-
+ 
 
     # Copier les fichiers sélectionnés
     move_files(

@@ -47,25 +47,25 @@ sample_files <- function(dt, sampleSize = 1, overSample = 1)
         logMsg(msg)
     }
 
+
     # data frame to store sampled rows
     sampled <- data.frame()
 
 
-    #############################################################
-    # First sample 5 files of 10 minutes duration from Dawn period (A1 to E3)
-    #############################################################
-    
-    for(gp in unique(substring(groups, 1, 1)))
+    # Sample main and over for each day and nesting period
+    for(gp in groups)
     {
-        # Filter all 10 min files within group gp 1 to 3
-        dt_gp_10min <- subset(dt, period %in% paste0(gp, 1:3) & duration == 600)
+        # subset to specific group
+        dt_gp <- subset(dt, period %in% gp)
 
-        # sampleSize sample
-        sampledRow <- sample(rownames(dt_gp_10min), sampleSize)
-        
-        # overSample sample (sampling overSample within the same period of main sample)
-        dt_gp_10min <- dt_gp_10min[-which(rownames(dt_gp_10min) == sampledRow), ] # remove already sampled row
-        overSampledRow <- sample(rownames(subset(dt_gp_10min, period == dt[sampledRow, 'period'])), overSample)
+        # sample main file
+        sampledRow <- sample(rownames(dt_gp), sampleSize)
+
+        # sample over, excluding already selected main file
+        overSampledRow <- sample(
+            rownames(dt_gp)[-which(rownames(dt_gp) == sampledRow)],
+            overSample
+        )
 
         # create gp data.frame to be merged with `sampled` data.frame
         sampled_gp <- dt[c(sampledRow, overSampledRow), ]
@@ -73,63 +73,7 @@ sample_files <- function(dt, sampleSize = 1, overSample = 1)
 
         sampled <- rbind(sampled, sampled_gp)
     }
-    
 
-    #############################################################
-    # Now sample `sampleSize` and `overSample` for the remaining groups not yet selected in the step above
-    #############################################################
-
-    # filter dt to groups not yet selected in the step above
-    groupsToSample <- setdiff(groups, unique(sampled$period))
-    dt_gp <- subset(dt, period %in% groupsToSample)
-
-    # sample `sampleSize` + `overSample` by group
-    sampled_ls <- lapply(split(dt_gp, dt_gp$period), 
-                         function(x) x[sample(nrow(x), sampleSize + overSample), ])
-
-    # add sampleTye column
-    sampled_ls <- lapply(sampled_ls,
-                         function(x) cbind(x, sampleType = c(rep('main', sampleSize), rep('over', overSample))))
-
-    # list to data.frame and fix rownames
-    sampled_dt <- do.call(rbind, sampled_ls)
-    rownames(sampled_dt) <- gsub('.*\\.', '', rownames(sampled_dt)) # remove everything before `.`
-
-
-    #############################################################
-    # Final sample to select 3 groups in the first period of nigth (A-E5)
-    # and let the remaining groups for the second period of nigth (A-E6)
-    #############################################################
-
-    # sample groups from first and second period of nigth
-    firstPeriod_nigth <- sample(LETTERS[1:5], 3)
-    secondPeriod_nigth <- setdiff(LETTERS[1:5], firstPeriod_nigth)
-
-    # Remove the not selected groups
-    groupsToRemove <- c(paste0(firstPeriod_nigth, 6), paste0(secondPeriod_nigth, 5))
-    sampled_dt <- subset(sampled_dt, !(period %in% groupsToRemove)) 
-
-    # merge with main dt
-    sampled <- rbind(sampled, sampled_dt)
-
-
-    #############################################################
-    # Select Atlas file from Dawn period with at least 10 minutes record
-    #############################################################
-
-    # # Filter all files from Dawn with at least 10 minutes duration
-    # dawnFiles <- subset(dt, period %in% paste0(rep(LETTERS[1:5], each = 3), 1:3) & duration >= 600)
-    
-    # # get row names of already sampled files from this period
-    # alreadySampled_dawn <- rownames(subset(sampled, duration >= 600 & period %in% paste0(rep(LETTERS[1:5], each = 3), 1:3)))
-    
-    # # sample atlas file
-    # specialRow <- sample(rownames(dawnFiles[which(!rownames(dawnFiles) %in% alreadySampled_dawn), ]), 1)
-
-    # # add atlas file to sampled dt
-    # specialDt <- dt[specialRow, ]
-    # specialDt$sampleType <- 'atlas'
-    # sampled <- rbind(sampled, specialDt)
 
     # log
     msg <- paste0(' For the ', length(groups), ' nesting and day periods:\n')
