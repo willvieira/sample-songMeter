@@ -40,7 +40,7 @@ make_list <- function(sampled, nbValidation, output)
 
     # sample one 10 min file for Atlas
     sampled$Atlas <- 0
-    atlas <- sample(which(sampled$selectionEcoute == 1 & sampled$duration == 600), 1)
+    atlas <- sample(which(sampled$selectionEcoute == 1 & round(sampled$duration, 0) == 600), 1)
     sampled$Atlas[atlas] <- 1
 
 
