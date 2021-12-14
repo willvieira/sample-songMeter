@@ -228,8 +228,8 @@ read_program <- function(File)
     names(df) <- tolower(names(df))
 
     # class some columns
-    df$datedebut <- lubridate::ymd(df$datedebut)
-    df$datefin <- lubridate::ymd(df$datefin)
+    df$ech_datedebut <- lubridate::ymd(df$ech_datedebut)
+    df$ech_datefin <- lubridate::ymd(df$ech_datefin)
 
     return ( as.data.frame(df) )
 }

@@ -56,8 +56,8 @@ classify_period <- function(dt, program, info, nesting_groups = 5)
     # Create a sequence of days from `startDate` to `endDate` and
     # check if uniqueDays found in dt are present in the sequence
     seqAllDays <- seq(
-        min(program$datedebut),
-        max(program$datefin),
+        min(program$ech_datedebut),
+        max(program$ech_datefin),
         by = 'day'
     )
     
@@ -71,8 +71,8 @@ classify_period <- function(dt, program, info, nesting_groups = 5)
     
     # filter uniqueDays within start and end dates
     uniqueDays <- uniqueDays[
-        uniqueDays >= min(program$datedebut) &
-        uniqueDays <= max(program$datefin)
+        uniqueDays >= min(program$ech_datedebut) &
+        uniqueDays <= max(program$ech_datefin)
     ]
 
 
@@ -111,12 +111,12 @@ classify_period <- function(dt, program, info, nesting_groups = 5)
         )
    
         # classify audio for each nesting period
-        for(dayPeriod in program$sousprog)
+        for(dayPeriod in program$ech_descriptif)
         {
-            program_p <- subset(program, sousprog == dayPeriod)
+            program_p <- subset(program, ech_descriptif == dayPeriod)
             
             # is the specific `Day` within the range of days?
-            if(uniqueDays[Day] %in% seq(program_p$datedebut, program_p$datefin, by = 'day')) {
+            if(uniqueDays[Day] %in% seq(program_p$ech_datedebut, program_p$ech_datefin, by = 'day')) {
                 
                 time_range <- program_range(
                     sunlight = sunlight,
@@ -153,53 +153,53 @@ program_range <- function(sunlight, program)
 
 
     # get start time
-    if(substr(program$heuredebut, 1, 4) == 'SSET') {
-        if(substr(program$heuredebut, 5, 5) == '+') {
+    if(substr(program$ech_heuredebut, 1, 4) == 'SSET') {
+        if(substr(program$ech_heuredebut, 5, 5) == '+') {
             startTime <- 
                 sunlight$sunset +
-                HMS(program$heuredebut)
+                HMS(program$ech_heuredebut)
         }else{
             startTime <- 
                 sunlight$sunset -
-                HMS(program$heuredebut)
+                HMS(program$ech_heuredebut)
         }
-    }else if(substr(program$heuredebut, 1, 4) == 'SRIS') {
-        if(substr(program$heuredebut, 5, 5) == '+') {
+    }else if(substr(program$ech_heuredebut, 1, 4) == 'SRIS') {
+        if(substr(program$ech_heuredebut, 5, 5) == '+') {
             startTime <-
                 sunlight$sunrise +
-                HMS(program$heuredebut)
+                HMS(program$ech_heuredebut)
         }else{
             startTime <-
                 sunlight$sunrise -
-                HMS(program$heuredebut)
+                HMS(program$ech_heuredebut)
        }
     }else{
-        stop('No pattern "SSET" or "SRIS" found in `heuredebut`')
+        stop('No pattern "SSET" or "SRIS" found in `ech_heuredebut`')
     }
 
     # get end time
-    if(substr(program$heurefin, 1, 4) == 'SSET') {
-        if(substr(program$heurefin, 5, 5) == '+') {
+    if(substr(program$ech_heurefin, 1, 4) == 'SSET') {
+        if(substr(program$ech_heurefin, 5, 5) == '+') {
             endTime <- 
                 sunlight$sunset +
-                HMS(program$heurefin)
+                HMS(program$ech_heurefin)
         }else{
             endTime <- 
                 sunlight$sunset -
-                HMS(program$heurefin)
+                HMS(program$ech_heurefin)
         }
-    }else if(substr(program$heurefin, 1, 4) == 'SRIS') {
-        if(substr(program$heurefin, 5, 5) == '+') {
+    }else if(substr(program$ech_heurefin, 1, 4) == 'SRIS') {
+        if(substr(program$ech_heurefin, 5, 5) == '+') {
             endTime <-
                 sunlight$sunrise +
-                HMS(program$heurefin)
+                HMS(program$ech_heurefin)
         }else{
             endTime <-
                 sunlight$sunrise -
-                HMS(program$heurefin)
+                HMS(program$ech_heurefin)
        }
     }else{
-        stop('No pattern "SSET" or "SRIS" found in `heurefin`')
+        stop('No pattern "SSET" or "SRIS" found in `ech_heurefin`')
     }
 
     return(
@@ -216,7 +216,7 @@ program_range <- function(sunlight, program)
 HMS <- function(string)
 {
     if(nchar(string) != 11)
-        stop('Heuredebut/Heurefin does not have 11 characters (error in HMS function)')
+        stop('ech_heuredebut/ech_heurefin does not have 11 characters (error in HMS function)')
 
     # get everything after pattern "SSSS+"
     hhmmss <- substr(string, 6, 11)
