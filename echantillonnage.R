@@ -69,6 +69,45 @@ sonometres <- sonometres[!sonometres %in% sonometres_a_enlever]
 
 
 
+
+###############################################################################
+# Première boucle par sonometre pour
+# 1. lister les fichiers
+# 2. creer une figure pour visualiser les fichiers sauvegarde à l'inteirieur du dossier du sonometre de la memoir flash
+
+for(sono in sonometres)
+{
+    # lister toutes les fichiers pour le sonometre
+    # `sizeRange_*` defini les limites min et max de taille (en KB) pour les fichiers 3 minutes et 10 minutes
+    # Si vous ne voulez pas faire de filtre, enlever les valeurs et ajouter un NA comme par example:
+    # durationRange_3 = NA,
+    # durationRange_10 = NA
+    sono_dt <- listAudio(
+        input = inputFolder,
+        songMeter = sono,
+        durationRange_3 = c(175, 185),
+        durationRange_10 = c(595, 605)
+    )
+
+    # Générer une figure avec tous les fichiers distribué par periode de nidification et dans la journée
+    # `sampled` pour ajouter de la couleur aux audios selectionnés
+    # `outputFile` c'est le dossier avec le nom du fichier où la fonction va sauvegarder le pdf
+    # la figure sera sauvegardé dedans le dossier du sonomètre
+    plot_files(
+        dt = sono_dt,
+        outputFile = file.path(inputFolder, sono, 'fichiersAudio.pdf')
+    )
+
+
+###############################################################################
+
+
+
+
+
+
+
+
 ###############################################################################
 # Boucle par sonomètre pour la selection des fichiers avec les etapes:
 # 1. lister toutes les fichiers pour le sonomètre i
