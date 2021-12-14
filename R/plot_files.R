@@ -61,7 +61,7 @@ plot_files <- function(dt, sampled = NULL, outputFile = NULL)
 
     if(!is.null(sampled))
     {
-        sampleColors = setNames(c('blue', 'green'), c('main', 'over'))
+        sampleColors = setNames(c('red', 'green'), c('main', 'over'))
         for(tp in c('main', 'over'))
         {
             # filter sample type
@@ -106,7 +106,7 @@ plot_files <- function(dt, sampled = NULL, outputFile = NULL)
 
             # skip if it's the last group
             if(!i == nestingPeriod_name[length(nestingPeriod_name)])
-                abline(h = groupDayRange[2] + 0.5)
+                abline(h = groupDayRange[2] - 0.5)
             
             mtext(paste('Group', i), side = 2, line = 5.8, cex = 0.85, at = groupDayRange[1] + (groupDayRange[2] - groupDayRange[1])/2)
         }
