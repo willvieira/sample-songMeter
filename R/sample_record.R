@@ -23,11 +23,12 @@
 # Output: dt file with two extra columns defining sample and extraSample rows [0, 1]
 sample_files <- function(dt, sampleSize = 1, overSample = 1)
 {
-    # log arguments into temp file
+    # log arguments into  temp file
     logMsg(
         paste0(
-            'sampleSize:', sampleSize, '\n',
-            'overSample:', overSample
+            '\nSample audio:\n',
+            'sampleSize: ', sampleSize, '\n',
+            'overSample: ', overSample
         ),
         console = FALSE
     )
