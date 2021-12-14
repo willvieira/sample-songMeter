@@ -138,7 +138,7 @@ classify_period <- function(dt, program, info, nesting_groups = 5)
     }
 
     # remove lines with NA (period of time out of the start and end day range)
-    #dt <- dt[which(!is.na(dt$period)), ]
+    dt <- dt[which(!is.na(dt$period)), ]
 
     return( dt )
 }
