@@ -10,6 +10,7 @@ if (!require('lutz')) install.packages('lutz')
 if (!require('rstudioapi')) install.packages('rstudioapi')
 if (!require('readxl')) install.packages('readxl')
 if (!require('yaml')) install.packages('yaml')
+if (!require('viridis')) install.packages('viridis')
 
 
 
@@ -97,7 +98,7 @@ for(sono in sonometres)
         dt = sono_dt,
         outputFile = file.path(inputFolder, sono, 'fichiersAudio.pdf')
     )
-
+}
 
 ###############################################################################
 
