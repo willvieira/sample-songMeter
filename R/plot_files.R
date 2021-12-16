@@ -5,7 +5,7 @@
 ####################################################################
 
 
-plot_files <- function(dt, sampled = NULL, outputFile = NULL)
+plot_files <- function(dt, outputFile = NULL)
 {
     # define timezone
     dt_tz <- lubridate::tz(dt$time[1])
@@ -59,22 +59,20 @@ plot_files <- function(dt, sampled = NULL, outputFile = NULL)
     axis(1, seqSecs, labels = FALSE, line = -1)
 
 
-    if(!is.null(sampled))
+    if('main' %in% names(dt))
     {
         sampleColors = setNames(c('red', 'green'), c('main', 'over'))
         for(tp in c('main', 'over'))
         {
             # filter sample type
-            sample_dt <- subset(sampled, sampleType == tp)
-            # get dt info of sampled files
-            sample_dt <- dt[match(sample_dt$fileName,dt$fileName), ]
-            
+            sampled <- which(dt[, tp] == 1)
+
             # add files as lines
-            for(i in 1:nrow(sample_dt))
+            for(i in sampled)
                 lines(
-                    x = c(sample_dt$startRecord[i], sample_dt$endRecord[i]),
-                    y = c(sample_dt$day[i], sample_dt$day[i]),
-                    lwd = 12, col = sampleColors[tp]
+                    x = c(dt$startRecord[i], dt$endRecord[i]),
+                    y = c(dt$day[i], dt$day[i]),
+                    lwd = 10, col = sampleColors[tp]
                 )
         }
     }
@@ -88,7 +86,6 @@ plot_files <- function(dt, sampled = NULL, outputFile = NULL)
         # color day period
         dayPeriod_col <- setNames(
             viridis::viridis(length(dayPeriod_name)),
-            #RColorBrewer::brewer.pal(n =length(dayPeriod_name), name = "Dark2"),
             dayPeriod_name
         )
 
@@ -116,7 +113,20 @@ plot_files <- function(dt, sampled = NULL, outputFile = NULL)
             lines(
                 x = c(dt$startRecord[i], dt$endRecord[i]),
                 y = c(dt$day[i], dt$day[i]),
-                lwd = 8, col = dayPeriod_col[gsub('*_.', '', dt$period[i])]
+                lwd = 6, col = dayPeriod_col[gsub('*_.', '', dt$period[i])]
+            )
+    }else if('incProb_sunrise' %in% names(dt)) {
+        dt$incl_prob <- (dt$incProb_sunrise + dt$incProb_sunset)/sum(dt$incProb_sunrise + dt$incProb_sunset)
+
+        # define color gradient in function of probability
+        dt$col <- viridis::viridis(30)[as.numeric(cut(dt$incl_prob, breaks = 30))]
+
+        # add files as lines
+        for(i in 1:nrow(dt))
+            lines(
+                x = c(dt$startRecord[i], dt$endRecord[i]),
+                y = c(dt$day[i], dt$day[i]),
+                lwd = 6, col = dt$col[i]
             )
     }else{
         # add files as lines
@@ -124,7 +134,7 @@ plot_files <- function(dt, sampled = NULL, outputFile = NULL)
             lines(
                 x = c(dt$startRecord[i], dt$endRecord[i]),
                 y = c(dt$day[i], dt$day[i]),
-                lwd = 8, col = '#63705c'
+                lwd = 6, col = '#63705c'
             )
     }
 
@@ -132,7 +142,7 @@ plot_files <- function(dt, sampled = NULL, outputFile = NULL)
     # legend
     if('period' %in% names(dt))
     {
-        if(!is.null(sampled))
+        if('main' %in% names(dt))
         {
             leg <- c(
                 'Main samples', 'Over samples',
@@ -145,6 +155,22 @@ plot_files <- function(dt, sampled = NULL, outputFile = NULL)
         }
 
         legend(86400/2, seqDays[1], legend = leg, lty = 1, lwd = 6, col = legColors, bty = 'n', cex = 0.75)
+    }else if('incProb_sunrise' %in% names(dt)) {
+        
+        if('main' %in% names(dt))
+        {
+            leg <- c(
+                'Main samples', 'Over samples'
+            )
+            legColors <- c(sampleColors)
+
+            legend(86400/2, seqDays[1], legend = leg, lty = 1, lwd = 6, col = legColors, bty = 'n', cex = 0.75)
+        }else{
+            
+        }
+
+        # legend(86400/2, seqDays[1], legend = leg, lty = 1, lwd = 6, col = legColors, bty = 'n', cex = 0.75)
+
     }
 
     invisible(dev.off())
