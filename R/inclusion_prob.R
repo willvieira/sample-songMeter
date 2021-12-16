@@ -11,6 +11,15 @@ incl_prob <- function(dt, info, sd)
 {
     colsToKeep <- names(dt)
 
+    # log arguments into temp file
+    logMsg(
+        paste0(
+            '\nInclusion probability:\n',
+            'sd: ', sd
+        ),
+        console = FALSE
+    )
+
     # function to transform any time within a day into a continous value of seconds (from 0 to 86400 seconds in a day)
     timeToSeconds <- function(Time)
         (lubridate::hour(Time) * 3600) + (lubridate::minute(Time) * 60) + lubridate::second(Time)
