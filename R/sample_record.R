@@ -2,18 +2,8 @@
 # Sample
 # Will Vieira
 # Feb 12, 2021
+# last edited: dec 16, 2021
 ####################################################################
-
-
-####################################################################
-# Steps
-# - For each period group (A1, A2, ..., B1, B2, ...)
-#   - Sample and extraSample
-#   - For each sampled file, test if sound quality is good (TODO)
-#   - If so assign sample number, if not sample again
-# - return dt
-####################################################################
-
 
 
 # Input:
@@ -86,4 +76,58 @@ sample_files <- function(dt, sampleSize = 1, overSample = 1)
 
     return( sampled )
 
+}
+
+
+
+
+
+# sample file using GRTS stratified by day and perid of time
+# Input:
+#   - dt output from incl_prob() function
+#   - sampleSize: total number of files per songMeter
+#   - overSample: total number of extra samples per songMeter
+# Output: dt file with two extra columns defining sample and extraSample rows [0, 1]
+sample_GRTS <- function(dt, sampleSize, overSample)
+{
+    # log arguments into temp file
+    logMsg(
+        paste0(
+            '\nSample audio using GRTS:\n',
+            'sampleSize: ', sampleSize, '\n',
+            'overSample: ', overSample
+        ),
+        console = FALSE
+    )
+
+    # define total inclusion probability from both sunrise and sunset
+    dt$incl_prob <- (dt$incProb_sunrise + dt$incProb_sunset)/
+        sum(dt$incProb_sunrise + dt$incProb_sunset)
+    
+    
+    # get day only (excluse time)
+    dt$day <- lubridate::date(dt$time)
+
+    # transform day and period o time in seconds as coordiantes for GRTS
+    sf_df <- sf::st_as_sf(
+        dt,
+        coords = c('day', 'TimeSecs'),
+        crs = 3395
+    )
+
+
+    # Run GRTS
+    samp <- spsurvey::grts(
+        sframe = sf_df,
+        n_base = sampleSize,
+        n_over = overSample,
+        aux_var =  'incl_prob'
+    )
+
+
+    # assign 1-0 to sampled files
+    dt$main = ifelse(dt$fileName %in% samp$sites_base$fileName, 1, 0)
+    dt$over = ifelse(dt$fileName %in% samp$sites_over$fileName, 1, 0)
+    
+    return( dt )
 }
