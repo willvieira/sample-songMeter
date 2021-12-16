@@ -7,18 +7,19 @@
 
 
 # function to assign inclusion probability as a function of distance to sunset and sunrise
-incl_prob <- function(dt, info, sd)
+incl_prob <- function(dt, info, sd, log = TRUE)
 {
     colsToKeep <- names(dt)
 
     # log arguments into temp file
-    logMsg(
-        paste0(
-            '\nInclusion probability:\n',
-            'sd: ', sd
-        ),
-        console = FALSE
-    )
+    if(log)
+        logMsg(
+            paste0(
+                '\nInclusion probability:\n',
+                'sd: ', sd
+            ),
+            console = FALSE
+        )
 
     # function to transform any time within a day into a continous value of seconds (from 0 to 86400 seconds in a day)
     timeToSeconds <- function(Time)
