@@ -68,6 +68,22 @@ sonometres <- sonometres[!sonometres %in% sonometres_a_enlever]
 
 
 
+################################################################################
+# Definir les paramètres
+################################################################################
+
+durationRange_3 = c(177, 597)         # en secondes
+durationRange_10 = c(597, 603)        # en secondes
+date_debut = as_date('2020-05-30')
+date_fin = as_date('2020-07-20')
+sd = 7200                             # écart-type de la dist de probabilite autour du lever et coucher du soleil en seconds
+cible = 20
+cible_remplecement = 20
+cible_validation = 5
+
+
+
+
 ###############################################################################
 # Première boucle par sonometre pour
 # 1. lister les fichiers
@@ -96,6 +112,8 @@ for(sono in sonometres)
         songMeter = sono,
         durationRange_3 = NA,
         durationRange_10 = NA,
+        start_date = NA,
+        end_date = NA,
         logMsg = FALSE
     )
 
@@ -111,8 +129,10 @@ for(sono in sonometres)
     sono_dt <- listAudio(
         input = inputFolder,
         songMeter = sono,
-        durationRange_3 = c(175, 185),
-        durationRange_10 = c(595, 605),
+        durationRange_3 = durationRange_3,
+        durationRange_10 = durationRange_10,
+        start_date = date_debut,
+        end_date = date_fin,
         logMsg = FALSE
     )
 
@@ -126,10 +146,12 @@ for(sono in sonometres)
     sonoProb_dt <- incl_prob(
         dt = sono_dt,
         info = sono_info,
-        sd = 7200,
+        sd = sd,
         logMsg = FALSE
     )
 
+    # calculate probabilite d'inclusion
+    sonoProb_dt$incl_prob <- (sonoProb_dt$incProb_sunrise + sonoProb_dt$incProb_sunset)/sum(sonoProb_dt$incProb_sunrise + sonoProb_dt$incProb_sunset)
 
     plot_files(
         dt = sonoProb_dt,
@@ -193,38 +215,39 @@ for(sono in sonometres)
     sono_dt <- listAudio(
         input = inputFolder,
         songMeter = sono,
-        durationRange_3 = c(175, 185),
-        durationRange_10 = c(595, 605)
+        durationRange_3 = durationRange_3,
+        durationRange_10 = durationRange_10,
+        start_date = date_debut,
+        end_date = date_fin
     )
 
 
-    # Classifier la liste des fichiers dans les periodes de nidification et dans la journée (A1 - E6)
-    # `groups` define en combien la period de temps (startDate - endDate) sera partagé
-    sonoClass_dt <- classify_period(
+
+    # calculer la probabilite d'inclusion
+    # sd est la variance autour du lever et coucher du soleil en secondes
+    sonoProb_dt <- incl_prob(
         dt = sono_dt,
-        program = ARU_program,
         info = sono_info,
-        nesting_groups = 5
+        sd = sd
     )
+
 
 
     # Échantillonner les fichiers
     # `sampleSize` et `overSample` pour chaque period de la journée ET groupe
-    sono_selection <- sample_files(
-        dt = sonoClass_dt,
-        sampleSize = 1,
-        overSample = 1
+    sono_selection <- sample_GRTS(
+        dt = sonoProb_dt,
+        sampleSize = cible,
+        overSample = cible_remplecement
     )
 
 
     # Générer une figure avec tous les fichiers distribué par periode de nidification et dans la journée
-    # `sampled` pour ajouter de la couleur aux audios selectionnés
     # `outputFile` c'est le dossier avec le nom du fichier où la fonction va sauvegarder le pdf
     # la figure sera sauvegardé dedans le dossier du sonomètre
     plot_files(
-        dt = sonoClass_dt,
-        sampled = sono_selection,
-        outputFile = file.path(outputFolder, sono, 'fichiersAudio.pdf')
+        dt = sono_selection,
+        outputFile = file.path(outputFolder, sono, 'fichiers_selection.pdf')
     )
  
 
@@ -239,7 +262,7 @@ for(sono in sonometres)
     # Générer la liste des fichiers selectionés
     make_list(
         sampled = sono_selection,
-        nbValidation = 5,
+        nbValidation = cible_validation,
         output = file.path(outputFolder, sono)
     )
 
