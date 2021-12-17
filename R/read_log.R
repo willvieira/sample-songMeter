@@ -128,7 +128,7 @@ read_log <- function(file)
 #   - durationRange_3: vector of minimum and maximum range of size for 3 min files
 #   - durationRange_10: vector of minimum and maximum range of size for 10 min files
 # Return data.frame similar to log
-listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 = NA, logMsg = TRUE)
+listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 = NA, start_date = NA, end_date = NA, logMsg = TRUE)
 {
     # log arguments into temp file
     if(logMsg)
@@ -138,7 +138,10 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
                 paste0(rep('#', 50), collapse = ''), '\n\n',
                 'List audio:\n',
                 'durationRange_3: ', paste(durationRange_3, collapse = ','), '\n',
-                'durationRange_10: ', paste(durationRange_10, collapse = ',')
+                'durationRange_10: ', paste(durationRange_10, collapse = ','),
+                '\n',
+                'start_date: ', start_date,
+                'end_date: ', end_date
             ),
             console = FALSE,
             append = FALSE
@@ -200,19 +203,54 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
     formatedTime <- lubridate::ymd_hms(yearHour, tz = 'America/Toronto') # TODO
 
 
+
+    # Filter data range
+    if(!is.na(start_date))
+    {
+        # Get days of sample
+        uniqueDays <- unique(lubridate::date(formatedTime))
+
+
+        # Create a sequence of days from `start_date` to `end_date` and
+        # check if uniqueDays found in dt are present in the sequence
+        seqAllDays <- seq(
+            start_date,
+            end_date,
+            by = 'day'
+        )
+        
+        matchDays <- seqAllDays %in% uniqueDays
+        if(!all(matchDays))
+            logMsg(
+                paste0(
+                    'There are missing days in the song meter. These are the days in which no file was recorded:\n',
+                    paste0(paste0(' - ', seqAllDays[!matchDays]), collapse = '\n'))
+            )
+        
+        # filter uniqueDays within start and end dates
+        daysToKeep <- which(
+            lubridate::date(formatedTime) >= start_date &
+            lubridate::date(formatedTime) <= end_date
+        )
+    }else{
+        daysToKeep <- 1:length(formatedTime)
+    }
+
+
+
     if(logMsg)
         logMsg(
-            paste('Saving', length(files), 'after filtering (if specified)')
+            paste('Saving', length(daysToKeep), 'after filtering (if specified)')
         )
 
 
     data.frame(
-        time = formatedTime,
-        input = input,
-        songMeter = songMeter,
-        fileName = files,
-        fileSize = fileSizes/1e3,
-        duration = duration
+        time = formatedTime[daysToKeep],
+        input = input[daysToKeep],
+        songMeter = songMeter[daysToKeep],
+        fileName = files[daysToKeep],
+        fileSize = fileSizes[daysToKeep]/1e3,
+        duration = duration[daysToKeep]
     )
 
 }
