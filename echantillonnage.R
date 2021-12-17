@@ -50,7 +50,10 @@ outputFolder <- rstudioapi::selectDirectory()
 ################################################################################
 
 # Extraire toute les dossiers à l'interieur du dossier inputFolder
-sonometres <- dir(inputFolder)
+sonometres <- list.dirs(inputFolder, recursive = FALSE, full.names = FALSE)
+
+# Maintenir seulement les dossier qui ne sont pas caché (avec `.`)
+sonometres <- sonometres[!substr(sonometres, 1, 1) == '.']
 
 # Voici toutes les dossiers trouvé:
 print(sonometres)
