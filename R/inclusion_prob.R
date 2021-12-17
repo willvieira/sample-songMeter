@@ -37,13 +37,13 @@ incl_prob <- function(dt, info, sd, logMsg = TRUE)
     # transform time to seconds
     dt$sunrise_secs <- timeToSeconds(sunlight$sunrise)
     dt$sunset_secs <- timeToSeconds(sunlight$sunset)
-    dt$TimeSecs <- timeToSeconds(dt$time)
+    dt$timeSecs <- timeToSeconds(dt$time)
 
 
     # get probability distribution in function of sunrise and sunset
-    dt$incProb_sunrise <- dnorm(dt$TimeSecs, dt$sunrise_secs, sd)
-    dt$incProb_sunset <- dnorm(dt$TimeSecs, dt$sunset_secs, sd)
+    dt$incProb_sunrise <- dnorm(dt$timeSecs, dt$sunrise_secs, sd)
+    dt$incProb_sunset <- dnorm(dt$timeSecs, dt$sunset_secs, sd)
 
 
-    return(dt[,c(colsToKeep, 'TimeSecs', 'incProb_sunrise', 'incProb_sunset')])
+    return(dt[,c(colsToKeep, 'timeSecs', 'incProb_sunrise', 'incProb_sunset')])
 }

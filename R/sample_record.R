@@ -113,7 +113,7 @@ sample_GRTS <- function(dt, sampleSize, overSample, logMsg = TRUE)
     # transform day and period o time in seconds as coordiantes for GRTS
     sf_df <- sf::st_as_sf(
         dt,
-        coords = c('day', 'TimeSecs'),
+        coords = c('day', 'timeSecs'),
         crs = 3395
     )
 
@@ -131,5 +131,10 @@ sample_GRTS <- function(dt, sampleSize, overSample, logMsg = TRUE)
     dt$main = ifelse(dt$fileName %in% samp$sites_base$fileName, 1, 0)
     dt$over = ifelse(dt$fileName %in% samp$sites_over$fileName, 1, 0)
     
+
+    # remove some columns
+    dt[, c('timeSecs', 'day', 'incProb_sunrise', 'incProb_sunset')] <- NULL
+
+
     return( dt )
 }
