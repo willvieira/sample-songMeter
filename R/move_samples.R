@@ -19,6 +19,17 @@ move_files <- function(sampled, input, output)
     songMeter_output <- file.path(output, sampled$songMeter[1])
 
 
+    # subset for selected files only
+    sampled <- subset(sampled, main == 1 | over == 1)
+
+
+    # create a sample type column
+    if(any(sampled$main == 1 & sampled$over == 1))
+        stop('The same audio was selected for main AND over')
+    
+    sampled$sampleType = ifelse(sampled$main == 1, 'main', 'over')
+
+
     # create file name with directory `from` and `to`
     sampled$from <- file.path(
         songMeter_input,
@@ -54,7 +65,7 @@ move_files <- function(sampled, input, output)
     if(all(moveResults))
     {
         logMsg(
-            paste('All', length(moveResults), 'files have been moved successfully!')
+            paste('\nMove files:\nAll', length(moveResults), 'files have been moved successfully!')
         )
     }else{
         msg <- 'We had problems moving the following files:\n'

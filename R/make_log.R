@@ -23,13 +23,16 @@ make_list <- function(sampled, nbValidation, output)
     # Create log with sampled files
     ##########################################
 
+    # subset for selected files only
+    sampled <- subset(sampled, main == 1 | over == 1)
+
     # remove file extension
     sampled$fileName_ne <- tools::file_path_sans_ext(sampled$fileName)
 
 
-    # create 0 - 1 columns to define if sample is main or over
-    sampled$selectionEcoute <- ifelse(sampled$sampleType == 'main', 1, 0)
-    sampled$selectionRemplecement <- ifelse(sampled$sampleType == 'over', 1, 0)
+    # rename 'main' and 'over' columns
+    names(sampled)[grep('main', names(sampled))] <- 'selectionEcoute'
+    names(sampled)[grep('over', names(sampled))] <- 'selectionRemplecement'
 
 
     # sample from main files to validation
@@ -45,7 +48,7 @@ make_list <- function(sampled, nbValidation, output)
 
 
     # Filter columns
-    sampled_export <- sampled[, c('songMeter', 'fileName_ne', 'selectionEcoute', 'selectionRemplecement', 'selectionValidation', 'Atlas')]
+    sampled_export <- sampled[, c('songMeter', 'fileName_ne', 'incl_prob', 'selectionEcoute', 'selectionRemplecement', 'selectionValidation', 'Atlas')]
 
 
     # rename columns
