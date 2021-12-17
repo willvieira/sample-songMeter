@@ -12,7 +12,7 @@ plot_files <- function(dt, outputFile = NULL)
 
     # define sequence of days (y axis)
     startDay <- lubridate::date(min(dt$time))
-    endDay <- lubridate::date(max(dt$time)) - lubridate::days(1)
+    endDay <- lubridate::date(max(dt$time))
     seqDays <- seq(startDay, endDay, by = 'day')    
 
     # function to transform any time within a day into a continous value of seconds (from 0 to 86400 seconds in a day)
@@ -50,7 +50,7 @@ plot_files <- function(dt, outputFile = NULL)
     seqSecs <- setNames(0:24 * 3600, paste0(0:24, 'h'))
 
 
-    pdf(height = 9.12, width = 12.43, file = outputFile)
+    pdf(height = length(unique(dt$day))/5, width = 12.43, file = outputFile)
     par(mar = c(2, 7, 2, 0.5))
     plot(0, pch = '', xlim = c(0, 86400), ylim = c(endDay + lubridate::days(1), startDay), bty = 'n', ann = FALSE, xaxt = 'n', yaxt = 'n')
     mtext(sf(seqDays), side = 2, at = seqDays, las = 1, line = 5.5, cex = 0.8, adj = 0)
@@ -115,8 +115,7 @@ plot_files <- function(dt, outputFile = NULL)
                 y = c(dt$day[i], dt$day[i]),
                 lwd = 6, col = dayPeriod_col[gsub('*_.', '', dt$period[i])]
             )
-    }else if('incProb_sunrise' %in% names(dt)) {
-        dt$incl_prob <- (dt$incProb_sunrise + dt$incProb_sunset)/sum(dt$incProb_sunrise + dt$incProb_sunset)
+    }else if('incl_prob' %in% names(dt)) {
 
         # define color gradient in function of probability
         dt$col <- viridis::viridis(30)[as.numeric(cut(dt$incl_prob, breaks = 30))]
