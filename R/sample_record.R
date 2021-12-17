@@ -11,17 +11,18 @@
 #   - sampleSize: number of samples by period group (e.g. if sampleSize = 1, and groups = 5 * 6, total sample = 30)
 #   - overSample: number of extra samples by period group
 # Output: dt file with two extra columns defining sample and extraSample rows [0, 1]
-sample_files <- function(dt, sampleSize = 1, overSample = 1)
+sample_files <- function(dt, sampleSize = 1, overSample = 1, logMsg = TRUE)
 {
     # log arguments into  temp file
-    logMsg(
-        paste0(
-            '\nSample audio:\n',
-            'sampleSize: ', sampleSize, '\n',
-            'overSample: ', overSample
-        ),
-        console = FALSE
-    )
+    if(logMsg)
+        logMsg(
+            paste0(
+                '\nSample audio:\n',
+                'sampleSize: ', sampleSize, '\n',
+                'overSample: ', overSample
+            ),
+            console = FALSE
+        )
 
     groups <- unique(dt$period)
 
@@ -35,7 +36,7 @@ sample_files <- function(dt, sampleSize = 1, overSample = 1)
         missingSamples <- names(which(nbByGroup < (sampleSize + overSample)))
         msg <- paste0('The following groups do not have enough files to sample (SampleSize + overSample = ', sampleSize + overSample, '):\n')
         msg <- paste0(msg, paste0(paste0('- ', missingSamples, ' = ', nbByGroup[missingSamples]), collapse = '\n'))
-        logMsg(msg)
+        if(logMsg) logMsg(msg)
     }
 
 
@@ -72,7 +73,7 @@ sample_files <- function(dt, sampleSize = 1, overSample = 1)
     msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'over')), ' over samples')
     # msg <- paste0(msg, ' - ', nrow(subset(sampled, sampleType == 'atlas')), ' atlas samples\n')
     
-    logMsg(msg)
+    if(logMsg) logMsg(msg)
 
     return( sampled )
 
@@ -88,17 +89,18 @@ sample_files <- function(dt, sampleSize = 1, overSample = 1)
 #   - sampleSize: total number of files per songMeter
 #   - overSample: total number of extra samples per songMeter
 # Output: dt file with two extra columns defining sample and extraSample rows [0, 1]
-sample_GRTS <- function(dt, sampleSize, overSample)
+sample_GRTS <- function(dt, sampleSize, overSample, logMsg = TRUE)
 {
     # log arguments into temp file
-    logMsg(
-        paste0(
-            '\nSample audio using GRTS:\n',
-            'sampleSize: ', sampleSize, '\n',
-            'overSample: ', overSample
-        ),
-        console = FALSE
-    )
+    if(logMsg)
+        logMsg(
+            paste0(
+                '\nSample audio using GRTS:\n',
+                'sampleSize: ', sampleSize, '\n',
+                'overSample: ', overSample
+            ),
+            console = FALSE
+        )
 
     # define total inclusion probability from both sunrise and sunset
     dt$incl_prob <- (dt$incProb_sunrise + dt$incProb_sunset)/

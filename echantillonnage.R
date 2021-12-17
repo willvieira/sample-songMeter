@@ -11,6 +11,7 @@ if (!require('rstudioapi')) install.packages('rstudioapi')
 if (!require('readxl')) install.packages('readxl')
 if (!require('yaml')) install.packages('yaml')
 if (!require('viridis')) install.packages('viridis')
+if (!require('spsurvey')) install.packages('spsurvey')
 
 
 
@@ -22,6 +23,8 @@ source('R/sample_record.R')
 source('R/plot_files.R')
 source('R/move_samples.R')
 source('R/make_log.R')
+source('R/inclusion_prob.R')
+
 
 
 
@@ -38,12 +41,6 @@ inputFolder <- rstudioapi::selectDirectory()
 outputFolder <- rstudioapi::selectDirectory()
 
 
-
-################################################################################
-# Charger le fichier Excel de programation des enregistreur
-################################################################################
-
-ARU_program <- read_program(rstudioapi::selectFile())
 
 
 
@@ -75,9 +72,20 @@ sonometres <- sonometres[!sonometres %in% sonometres_a_enlever]
 # Première boucle par sonometre pour
 # 1. lister les fichiers
 # 2. creer une figure pour visualiser les fichiers sauvegarde à l'inteirieur du dossier du sonometre de la memoir flash
+# 3. Repeter les deux dernier etapes, mais avec un filtre sur la duré des audio
+###############################################################################
 
 for(sono in sonometres)
 {
+    # read song meter log
+    sono_info <- yaml::read_yaml(
+        file.path(
+            inputFolder,
+            sono,
+            'log.yaml'
+        )
+    )
+
     # lister toutes les fichiers pour le sonometre
     # `sizeRange_*` defini les limites min et max de taille (en KB) pour les fichiers 3 minutes et 10 minutes
     # Si vous ne voulez pas faire de filtre, enlever les valeurs et ajouter un NA comme par example:
@@ -86,21 +94,48 @@ for(sono in sonometres)
     sono_dt <- listAudio(
         input = inputFolder,
         songMeter = sono,
-        durationRange_3 = c(175, 185),
-        durationRange_10 = c(595, 605)
+        durationRange_3 = NA,
+        durationRange_10 = NA,
+        logMsg = FALSE
     )
 
     # Générer une figure avec tous les fichiers distribué par periode de nidification et dans la journée
-    # `sampled` pour ajouter de la couleur aux audios selectionnés
     # `outputFile` c'est le dossier avec le nom du fichier où la fonction va sauvegarder le pdf
     # la figure sera sauvegardé dedans le dossier du sonomètre
     plot_files(
         dt = sono_dt,
         outputFile = file.path(inputFolder, sono, 'fichiersAudio.pdf')
     )
-}
 
-###############################################################################
+    # deuxième etape, mais avec un filtre pour les fichiers 3 et 10 min
+    sono_dt <- listAudio(
+        input = inputFolder,
+        songMeter = sono,
+        durationRange_3 = c(175, 185),
+        durationRange_10 = c(595, 605),
+        logMsg = FALSE
+    )
+
+    plot_files(
+        dt = sono_dt,
+        outputFile = file.path(inputFolder, sono, 'fichiersAudio_avecFiltre.pdf')
+    )
+
+    # calculer la probabilite d'inclusion
+    # sd est la variance autour du lever et coucher du soleil en secondes
+    sonoProb_dt <- incl_prob(
+        dt = sono_dt,
+        info = sono_info,
+        sd = 7200,
+        logMsg = FALSE
+    )
+
+
+    plot_files(
+        dt = sonoProb_dt,
+        outputFile = file.path(inputFolder, sono, 'fichiersAudio_avecFiltre_probInclusion.pdf')
+    )
+}
 
 
 

@@ -7,12 +7,12 @@
 
 
 # function to assign inclusion probability as a function of distance to sunset and sunrise
-incl_prob <- function(dt, info, sd, log = TRUE)
+incl_prob <- function(dt, info, sd, logMsg = TRUE)
 {
     colsToKeep <- names(dt)
 
     # log arguments into temp file
-    if(log)
+    if(logMsg)
         logMsg(
             paste0(
                 '\nInclusion probability:\n',

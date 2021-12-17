@@ -128,10 +128,10 @@ read_log <- function(file)
 #   - durationRange_3: vector of minimum and maximum range of size for 3 min files
 #   - durationRange_10: vector of minimum and maximum range of size for 10 min files
 # Return data.frame similar to log
-listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 = NA, log = TRUE)
+listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 = NA, logMsg = TRUE)
 {
     # log arguments into temp file
-    if(log)
+    if(logMsg)
         logMsg(
             paste0(
                 'songMeter:', songMeter, '\n',
@@ -148,7 +148,7 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
     files <- dir(file.path(input, songMeter), pattern = '.wav')
 
     # log
-    if(log)
+    if(logMsg)
         logMsg(
             paste('A total of', length(files), '.wav files were found in the song meter folder')
         )
@@ -185,11 +185,11 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
             fileSizes <- fileSizes[toKeep]
             duration <- duration[toKeep]
         }else{
-            if(log)
+            if(logMsg)
                 logMsg('Ignore filtering files by duration because at least one of the `durationRange_` arguments are `NA`')
         }
     }else{
-        if(log)
+        if(logMsg)
             logMsg('Ignore filtering files by duration because at least one of the `durationRange_` arguments are `NA`')
     }
 
@@ -200,7 +200,7 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
     formatedTime <- lubridate::ymd_hms(yearHour, tz = 'America/Toronto') # TODO
 
 
-    if(log)
+    if(logMsg)
         logMsg(
             paste('Saving', length(files), 'after filtering (if specified)')
         )
