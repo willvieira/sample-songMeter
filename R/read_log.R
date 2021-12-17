@@ -178,22 +178,35 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
         if( !is.na(durationRange_10[1]) )
         {
             toKeep <- which(
-                duration >= durationRange_3[1] &
+                duration > durationRange_3[1] &
                 duration <= durationRange_3[2] |
-                duration >= durationRange_10[1] &
+                duration > durationRange_10[1] &
                 duration <= durationRange_10[2]
             )
 
+            # filter files
             files <- files[toKeep]
             fileSizes <- fileSizes[toKeep]
             duration <- duration[toKeep]
+
+            # create a group to classify files into 3 or 10 min
+            groupeDure <- ifelse(
+                 duration > durationRange_3[1] &
+                duration <= durationRange_3[2],
+                '3min',
+                '10min'
+            )
         }else{
             if(logMsg)
                 logMsg('Ignore filtering files by duration because at least one of the `durationRange_` arguments are `NA`')
+            
+            groupeDure <- NA
         }
     }else{
         if(logMsg)
             logMsg('Ignore filtering files by duration because at least one of the `durationRange_` arguments are `NA`')
+
+        groupeDure <- NA
     }
 
 
@@ -232,6 +245,13 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
             lubridate::date(formatedTime) >= start_date &
             lubridate::date(formatedTime) <= end_date
         )
+
+        formatedTime <- formatedTime[daysToKeep]
+        files <- files[daysToKeep]
+        fileSizes <- fileSizes[daysToKeep]
+        duration <- duration[daysToKeep]
+        groupeDure <- groupeDure[daysToKeep]
+
     }else{
         daysToKeep <- 1:length(formatedTime)
     }
@@ -245,12 +265,13 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
 
 
     data.frame(
-        time = formatedTime[daysToKeep],
-        input = input[daysToKeep],
-        songMeter = songMeter[daysToKeep],
-        fileName = files[daysToKeep],
-        fileSize = fileSizes[daysToKeep]/1e3,
-        duration = duration[daysToKeep]
+        time = formatedTime,
+        input = input,
+        songMeter = songMeter,
+        fileName = files,
+        fileSize = fileSizes/1e3,
+        duration = duration,
+        groupeDure = groupeDure
     )
 
 }
