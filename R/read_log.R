@@ -141,6 +141,7 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
                 'durationRange_10: ', paste(durationRange_10, collapse = ','),
                 '\n',
                 'start_date: ', start_date,
+                '\n',
                 'end_date: ', end_date
             ),
             console = FALSE,

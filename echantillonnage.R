@@ -231,7 +231,7 @@ for(sono in sonometres)
 for(sono in sonometres)
 {
     # imprimer dans la console le nom du sonometre pour vérifier le progress de la boucle
-    cat('\n\n', paste0(rep('#', 50), collapse = ''), '\n  Sonomètre:', sono, '\n', paste0(rep('#', 50), collapse = ''))
+    cat('\n\n', paste0(rep('#', 50), collapse = ''), '\n  Sonomètre:', sono, '\n', paste0(rep('#', 50), collapse = ''), '\n')
 
 
     # read song meter log
