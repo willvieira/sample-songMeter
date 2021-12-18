@@ -20,45 +20,54 @@
 make_list <- function(sampled, nbValidation, output)
 {
 
-    # Create log with sampled files
-    ##########################################
-
-    # subset for selected files only
-    sampled <- subset(sampled, main == 1 | over == 1)
-
-    # remove file extension
-    sampled$fileName_ne <- tools::file_path_sans_ext(sampled$fileName)
-
-
-    # rename 'main' and 'over' columns
-    names(sampled)[grep('main', names(sampled))] <- 'selectionEcoute'
-    names(sampled)[grep('over', names(sampled))] <- 'selectionRemplecement'
-
+    # list all local files without filter
+    allFiles <- listAudio(
+        input = sampled$input[1],
+        songMeter = sampled$songMeter[1],
+        logMsg = FALSE
+    )
+    
 
     # sample from main files to validation
     sampled$selectionValidation <- 0
-    toValidate <- sample(which(sampled$selectionEcoute == 1), nbValidation)
+    toValidate <- sample(which(sampled$main == 1), nbValidation)
     sampled$selectionValidation[toValidate] <- 1
 
 
     # sample one 10 min file for Atlas
     sampled$Atlas <- 0
-    atlas <- sample(which(sampled$selectionEcoute == 1 & sampled$groupeDure == '10min'), 1)
+    atlas <- sample(which(sampled$main == 1 & sampled$groupeDure == '10min'), 1)
     sampled$Atlas[atlas] <- 1
 
 
-    # Filter columns
-    sampled_export <- sampled[, c('songMeter', 'fileName_ne', 'incl_prob', 'selectionEcoute', 'selectionRemplecement', 'selectionValidation', 'Atlas')]
+    # Filter columns and format file size from Kb to Mb
+    dt_export <- allFiles[, c('songMeter', 'fileName', 'fileSize')]
+    dt_export$fileSize <- dt_export$fileSize/1e3
+
+    # create new columns to be added from sampled
+    dt_export[, c('apres_filtre', 'selection_ecoute', 'selection_remplacement', 'selection_validation', 'atlas')] <- 0
+    dt_export$incl_prob <- NA
+
+
+    # merge cols from sampled
+    sampled_rows <- match(sampled$fileName, allFiles$fileName)
+
+    dt_export$apres_filtre[sampled_rows] <- 1
+    dt_export$selection_ecoute[sampled_rows] <- sampled$main
+    dt_export$selection_remplacement[sampled_rows] <- sampled$over
+    dt_export$selection_validation[sampled_rows] <- sampled$selectionValidation
+    dt_export$atlas[sampled_rows] <- sampled$Atlas
+    dt_export$incl_prob[sampled_rows] <- sampled$incl_prob
 
 
     # rename columns
-    names(sampled_export)[1:2] <- c('sonometre', 'fichier')
+    names(dt_export)[1:2] <- c('sonometre', 'fichier')
 
 
     # save text file
-    write.csv2(
-        sampled_export,
-        file = file.path(output, 'liste_selectionne.txt'),
+    write.csv(
+        dt_export,
+        file = file.path(output, 'liste_selectionne.csv'),
         row.names = FALSE
     )
 
