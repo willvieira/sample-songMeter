@@ -234,11 +234,12 @@ listAudio <- function(input, songMeter, durationRange_3 = NA, durationRange_10 =
         
         matchDays <- seqAllDays %in% uniqueDays
         if(!all(matchDays))
-            logMsg(
-                paste0(
-                    'There are missing days in the song meter. These are the days in which no file was recorded:\n',
-                    paste0(paste0(' - ', seqAllDays[!matchDays]), collapse = '\n'))
-            )
+            if(logMsg)
+                logMsg(
+                    paste0(
+                        'There are missing days in the song meter. These are the days in which no file was recorded:\n',
+                        paste0(paste0(' - ', seqAllDays[!matchDays]), collapse = '\n'))
+                )
         
         # filter uniqueDays within start and end dates
         daysToKeep <- which(
