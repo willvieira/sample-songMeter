@@ -61,7 +61,7 @@ plot_files <- function(dt, outputFile = NULL)
 
     if('main' %in% names(dt))
     {
-        sampleColors = setNames(c('red', 'green'), c('main', 'over'))
+        sampleColors = setNames(c('red', 'violet'), c('main', 'over'))
         for(tp in c('main', 'over'))
         {
             # filter sample type
@@ -154,7 +154,7 @@ plot_files <- function(dt, outputFile = NULL)
         }
 
         legend(86400/2, seqDays[1], legend = leg, lty = 1, lwd = 6, col = legColors, bty = 'n', cex = 0.75)
-    }else if('incProb_sunrise' %in% names(dt)) {
+    }else if('incl_prob' %in% names(dt)) {
         
         if('main' %in% names(dt))
         {
