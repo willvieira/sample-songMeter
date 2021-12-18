@@ -40,7 +40,22 @@ inputFolder <- rstudioapi::selectDirectory()
 # Définir le dossier de sortir (où sauvegarder les audio sélectionnés?)
 outputFolder <- rstudioapi::selectDirectory()
 
-
+# Lire le fichier R de reference avec les information de chaque sonometre
+refFile <- as.data.frame(
+    read_excel(
+        path = rstudioapi::selectFile(),
+        col_types = c(
+            'text',
+            'text',
+            'text',
+            'text',
+            'numeric',
+            'numeric',
+            'text',
+            'numeric'
+        )
+    )
+)
 
 
 
@@ -66,6 +81,40 @@ sonometres_a_enlever <- c('', '')
 sonometres <- sonometres[!sonometres %in% sonometres_a_enlever]
 
 
+
+
+
+
+################################################################################
+# Vérifier que tous les sonomètres ont un fichier `log.yaml`
+# Si non, creer ce fichier à l'aide d'une table de reference
+################################################################################
+
+for(sono in sonometres)
+{
+    # list log.yaml file
+    log_file <- list.files(file.path(inputFolder, sono), pattern = 'log.yaml')
+
+    if(!length(log_file) > 0) {
+        
+        # get which sono in refFile
+        toSave <- which(sono == refFile$ReleveCode)
+
+        # Creer les fichiers log pour la selection des audio
+        yaml::write_yaml(
+            refFile[toSave, ],
+            file = file.path(
+                inputFolder,
+                sono,
+                'log.yaml'
+            )
+        )
+
+        cat(sono, ':', 'log.yaml created\n\n')
+    }else {
+       cat(sono, ':', 'log.yaml already exists\n\n')
+    }
+}
 
 
 
