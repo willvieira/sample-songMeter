@@ -128,7 +128,9 @@ durationRange_3 = c(177, 597)         # en secondes
 durationRange_10 = c(597, 603)        # en secondes
 date_debut = as_date('2020-05-30')
 date_fin = as_date('2020-07-20')
-sd = 7200                             # écart-type de la dist de probabilite autour du lever et coucher du soleil en seconds
+# écart-type de la dist de probabilite autour du lever et coucher du soleil en seconds
+sd_sunrise = 3600
+sd_sunset = 14000
 cible = 20
 cible_remplecement = 20
 cible_validation = 5
@@ -198,7 +200,8 @@ for(sono in sonometres)
     sonoProb_dt <- incl_prob(
         dt = sono_dt,
         info = sono_info,
-        sd = sd,
+        sd_sunsrise = sd_sunrise,
+        sd_sunset = sd_sunset,
         logMsg = FALSE
     )
 
@@ -210,7 +213,6 @@ for(sono in sonometres)
         outputFile = file.path(inputFolder, sono, 'fichiersAudio_avecFiltre_probInclusion.pdf')
     )
 }
-
 
 
 
@@ -280,7 +282,8 @@ for(sono in sonometres)
     sonoProb_dt <- incl_prob(
         dt = sono_dt,
         info = sono_info,
-        sd = sd
+        sd_sunsrise = sd_sunrise,
+        sd_sunset = sd_sunset
     )
 
 

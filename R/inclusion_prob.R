@@ -7,7 +7,7 @@
 
 
 # function to assign inclusion probability as a function of distance to sunset and sunrise
-incl_prob <- function(dt, info, sd, logMsg = TRUE)
+incl_prob <- function(dt, info, sd_sunrise, sd_sunset, logMsg = TRUE)
 {
     colsToKeep <- names(dt)
 
@@ -16,7 +16,8 @@ incl_prob <- function(dt, info, sd, logMsg = TRUE)
         logMsg(
             paste0(
                 '\nInclusion probability:\n',
-                'sd: ', sd
+                'sd_sunset: ', sd_sunset, '\n',
+                'sd_sunrise: ', sd_sunrise
             ),
             console = FALSE
         )
@@ -41,8 +42,8 @@ incl_prob <- function(dt, info, sd, logMsg = TRUE)
 
 
     # get probability distribution in function of sunrise and sunset
-    dt$incProb_sunrise <- dnorm(dt$timeSecs, dt$sunrise_secs, sd)
-    dt$incProb_sunset <- dnorm(dt$timeSecs, dt$sunset_secs, sd)
+    dt$incProb_sunrise <- dnorm(dt$timeSecs, dt$sunrise_secs, sd_sunrise)
+    dt$incProb_sunset <- dnorm(dt$timeSecs, dt$sunset_secs, sd_sunset)
 
 
     return(dt[,c(colsToKeep, 'timeSecs', 'incProb_sunrise', 'incProb_sunset')])
