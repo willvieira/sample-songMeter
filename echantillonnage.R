@@ -100,17 +100,21 @@ for(sono in sonometres)
         # get which sono in refFile
         toSave <- which(sono == refFile$ReleveCode)
 
-        # Creer les fichiers log pour la selection des audio
-        yaml::write_yaml(
-            refFile[toSave, ],
-            file = file.path(
-                inputFolder,
-                sono,
-                'log.yaml'
+        if(length(toSave) > 0) {
+            # Creer les fichiers log pour la selection des audio
+            yaml::write_yaml(
+                refFile[toSave, ],
+                file = file.path(
+                    inputFolder,
+                    sono,
+                    'log.yaml'
+                )
             )
-        )
 
-        cat(sono, ':', 'log.yaml created\n\n')
+            cat(sono, ':', 'log.yaml created\n\n')
+        }else{ 
+            cat(sono, ':', 'song meter not found in `refFile`\n\n')
+        }
     }else {
        cat(sono, ':', 'log.yaml already exists\n\n')
     }
@@ -129,8 +133,8 @@ durationRange_10 = c(597, 603)        # en secondes
 date_debut = as_date('2020-05-30')
 date_fin = as_date('2020-07-20')
 # écart-type de la dist de probabilite autour du lever et coucher du soleil en seconds
-sd_sunrise = 3600
-sd_sunset = 14000
+sd_sunrise = 7200
+sd_sunset = 4400
 cible = 20
 cible_remplecement = 20
 cible_validation = 5
