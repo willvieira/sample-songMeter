@@ -46,7 +46,7 @@ make_list <- function(sampled, nbValidation, output)
 
     # create new columns to be added from sampled
     dt_export[, c('apres_filtre', 'selection_ecoute', 'selection_remplacement', 'selection_validation', 'atlas')] <- 0
-    dt_export$incl_prob <- NA
+    dt_export$incl_prob <- dt_export$groupeDuree <- NA
 
 
     # merge cols from sampled
@@ -58,10 +58,11 @@ make_list <- function(sampled, nbValidation, output)
     dt_export$selection_validation[sampled_rows] <- sampled$selectionValidation
     dt_export$atlas[sampled_rows] <- sampled$Atlas
     dt_export$incl_prob[sampled_rows] <- sampled$incl_prob
+    dt_export$groupeDuree[sampled_rows] <- sampled$groupeDure
 
 
     # rename columns
-    names(dt_export)[1:2] <- c('sonometre', 'fichier')
+    names(dt_export)[1:2] <- c('ReleveCode', 'fichier')
 
 
     # save text file
