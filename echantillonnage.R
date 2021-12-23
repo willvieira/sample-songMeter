@@ -326,3 +326,26 @@ for(sono in sonometres)
     )
 
 }
+
+
+
+
+
+###############################################################################
+# Fusionner les fichiers .csv ensembles 
+###############################################################################
+
+csv_ls <- list()
+for(sono in sonometres)
+{
+    # read Excel
+    csv_ls[[sono]] <- read.csv(
+        file.path(outputFolder, sono, 'liste_selectionne.csv')
+    )
+}
+
+write.csv(
+    do.call(rbind, csv_ls),
+    file = file.path(outputFolder, 'liste_selectionne.csv'),
+    row.names = FALSE
+)
